@@ -28,6 +28,7 @@ def gpt_builder(args, pre_process, post_process, vp_stage=None, config=None, pg_
             config = core_transformer_config_from_yaml(args, "language_model")
         else:
             config = core_transformer_config_from_args(args)
+    config.finalize()
     if args.spec is not None:
         transformer_layer_spec = import_module(args.spec)
     else:

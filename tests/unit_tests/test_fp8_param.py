@@ -90,6 +90,7 @@ class TestFP8Param:
         model_parallel_cuda_manual_seed(_SEED)
         args = get_args()
         config = core_transformer_config_from_args(args)
+        config.finalize()
         transformer_layer_spec = layer_spec_fn()
         return GPTModel(
             config=config,

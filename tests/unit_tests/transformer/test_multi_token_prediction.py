@@ -250,6 +250,7 @@ class TestMultiTokenPrediction:
         model_parallel_cuda_manual_seed(_SEED)
         args = get_args()
         config = core_transformer_config_from_args(args)
+        config.finalize()
         transformer_layer_spec = layer_spec_fn(
             args.num_experts, args.moe_grouped_gemm, args.qk_layernorm
         )
@@ -807,6 +808,7 @@ class TestMultiTokenPredictionHybrid:
         model_parallel_cuda_manual_seed(_SEED)
         args = get_args()
         config = core_transformer_config_from_args(args)
+        config.finalize()
 
         # MTP is configured via unified pattern in hybrid_layer_pattern
         # HybridModel creates the MTP block internally based on the parsed pattern

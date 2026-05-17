@@ -62,6 +62,7 @@ def model_provider(
     args = get_args()
 
     config = core_transformer_config_from_args(args)
+    config.finalize()
     use_te = args.transformer_impl == "transformer_engine"
     if use_te:
         layer_spec_fn = get_gpt_layer_with_transformer_engine_spec

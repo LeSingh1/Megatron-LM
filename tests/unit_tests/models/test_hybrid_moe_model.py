@@ -505,6 +505,7 @@ class TestHybridMoEModel:
         model_parallel_cuda_manual_seed(123)
 
         model_config = core_transformer_config_from_args(args, TransformerConfig)
+        model_config.finalize()
 
         self.model = HybridModel(
             config=model_config,

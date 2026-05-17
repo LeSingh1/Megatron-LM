@@ -774,6 +774,7 @@ class TestTEGroupedMLP:
             moe_grouped_gemm=True,
             use_transformer_engine_op_fuser=True,
         )
+        tf_config.finalize()
         _set_random_seed(seed_=123, data_parallel_random_init=False)
         submodules = get_submodules(
             get_gpt_layer_with_transformer_engine_submodules(
@@ -861,6 +862,7 @@ class TestTEGroupedMLP:
             moe_grouped_gemm=True,
             use_transformer_engine_op_fuser=True,
         )
+        tf_config.finalize()
         _set_random_seed(seed_=123, data_parallel_random_init=False)
         submodules = get_submodules(
             get_gpt_layer_with_transformer_engine_submodules(

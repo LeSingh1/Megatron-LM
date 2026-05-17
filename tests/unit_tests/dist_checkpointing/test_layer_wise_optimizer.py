@@ -95,6 +95,7 @@ def initialize_real_model(
     default_config_kwargs.update(**config_kwargs)
     config_cls = MLATransformerConfig if is_mla else TransformerConfig
     transformer_config = config_cls(**default_config_kwargs)
+    transformer_config.finalize()
 
     if is_moe:
         layer_spec = get_gpt_decoder_block_spec(

@@ -13,6 +13,7 @@ def hybrid_builder(args, pre_process, post_process, vp_stage=None, config=None, 
     print_rank_0('building Hybrid model ...')
     if config is None:
         config = core_transformer_config_from_args(args, TransformerConfig)
+    config.finalize()
 
     if config.transformer_impl == "inference_optimized":
         hybrid_stack_spec = hybrid_inference_stack_spec
