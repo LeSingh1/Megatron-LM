@@ -2375,7 +2375,15 @@ class MLATransformerConfig(TransformerConfig):
        Otherwise fall back to the unfused MLA.
     """
 
-    def __post_init__(self):
+    def finalize(self):
+        """Python dataclass method that is used to modify attributes after initialization.
+        See https://docs.python.org/3/library/dataclasses.html#post-init-processing for more
+        details.
+
+        This function serves the same purpose as a `__post_init__()` function, however it
+        can be called voluntarily. For example, a user may construct the dataclass, make
+        modifications to attributes (via dot-access), and then run this function afterwards.
+        """
         super().finalize()
         if self.multi_latent_attention and self.apply_rope_fusion and self.rope_type != "yarn":
             raise ValueError("apply_rope_fusion for MLA only works with YARN RoPE.")

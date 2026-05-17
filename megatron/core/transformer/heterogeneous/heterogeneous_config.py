@@ -198,7 +198,15 @@ class HeterogeneousTransformerConfig(TransformerConfig):
     """Configuration parameters for each of the transformer blocks in a 
     heterogeneous transformer."""
 
-    def __post_init__(self):
+    def finalize(self):
+        """Python dataclass method that is used to modify attributes after initialization.
+        See https://docs.python.org/3/library/dataclasses.html#post-init-processing for more
+        details.
+
+        This function serves the same purpose as a `__post_init__()` function, however it
+        can be called voluntarily. For example, a user may construct the dataclass, make
+        modifications to attributes (via dot-access), and then run this function afterwards.
+        """
         super().finalize()
 
         self.heterogeneous_block_specs = True
