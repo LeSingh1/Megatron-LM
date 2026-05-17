@@ -456,6 +456,7 @@ class TestMultiModulePipelineCommunicator:
             'generator': [],  # generator is the final module
         }
         config = ModelParallelConfig(pipeline_dtype=torch.float)
+        config.finalize()
         # Define dimension mapping for sequence, batch, hidden
         dim_mapping = {'s': 0, 'h': 2, 'b': 1}
         seq_dim = dim_mapping['s']

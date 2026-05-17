@@ -30,6 +30,7 @@ class TestParallelAttentionWithNoRope:
             autocast_dtype=torch.bfloat16,
             flash_decode=False,  # Ensure flash_decode is off to test RoPE skipping
         )
+        self.transformer_config.finalize()
         self.parallel_attention = SelfAttention(
             self.transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
