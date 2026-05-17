@@ -56,13 +56,15 @@ class TestInferenceWandbLogging:
         metrics_writer=None,
     ):
         """Helper to create a DynamicInferenceContext."""
+        model_config = TransformerConfig(
+            params_dtype=params_dtype,
+            num_layers=num_layers,
+            kv_channels=kv_channels,
+            num_attention_heads=num_attention_heads,
+        )
+        model_config.finalize()
         return DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=params_dtype,
-                num_layers=num_layers,
-                kv_channels=kv_channels,
-                num_attention_heads=num_attention_heads,
-            ),
+            model_config=model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=max_sequence_length,
                 num_cuda_graphs=None,
@@ -229,10 +231,12 @@ class TestInferenceWandbLogging:
     def test_paused_requests_in_stats(self):
         """Test that paused requests are correctly reflected in stats."""
         set_rounder(1)
+        model_config = TransformerConfig(
+            params_dtype=torch.float32, num_layers=2, kv_channels=64, num_attention_heads=8
+        )
+        model_config.finalize()
         dynamic_context = DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=torch.float32, num_layers=2, kv_channels=64, num_attention_heads=8
-            ),
+            model_config=model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=128,
                 num_cuda_graphs=None,

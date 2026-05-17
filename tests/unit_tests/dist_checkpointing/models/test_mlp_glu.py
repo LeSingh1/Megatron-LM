@@ -28,6 +28,7 @@ def initialize_mlp(glu=True):
         use_cpu_initialization=True,
         gated_linear_unit=glu,
     )
+    transformer_config.finalize()
     mlp_submodules = get_submodules(get_gpt_layer_with_transformer_engine_submodules().mlp)
     assert isinstance(mlp_submodules, MLPSubmodules)
     return MLP(transformer_config, mlp_submodules)

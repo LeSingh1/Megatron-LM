@@ -76,6 +76,7 @@ class TestParallelTransformerBlockCudagraphs:
             use_cpu_initialization=True,
             cuda_graph_impl="local",
         )
+        self.transformer_config.finalize()
         self.parallel_transformer_block = TransformerBlock(
             self.transformer_config, get_gpt_layer_with_transformer_engine_spec()
         )
@@ -221,6 +222,7 @@ def test_cuda_graph_determine_first_last_layer_logic(
         num_layers_in_last_pipeline_stage=num_layers_in_last_pipeline_stage,
         pipeline_model_parallel_layout=pp_layout,
     )
+    transformer_config.finalize()
     model = []
     for i in range(vpp or 1):
         this_model = GPTModel(
@@ -311,6 +313,7 @@ class TestLLaVACudaGraph:
             use_cpu_initialization=True,
             cuda_graph_impl="local",  # Enable CUDA graphs
         )
+        language_config.finalize()
 
         # Create vision transformer config
         vision_config = TransformerConfig(
@@ -320,6 +323,7 @@ class TestLLaVACudaGraph:
             use_cpu_initialization=True,
             cuda_graph_impl="local",  # Enable CUDA graphs for vision model too
         )
+        vision_config.finalize()
 
         # Create vision projection config
         vision_projection_config = TransformerConfig(
@@ -329,6 +333,7 @@ class TestLLaVACudaGraph:
             num_attention_heads=1,
             use_cpu_initialization=True,
         )
+        vision_projection_config.finalize()
 
         # Get layer specs
         language_layer_submodules = get_gpt_layer_with_transformer_engine_submodules()
@@ -492,6 +497,7 @@ class TestParallelHybridBlockCudagraphs:
                 use_cpu_initialization=True,
                 cuda_graph_impl="local",
             )
+            transformer_config.finalize()
             modules = hybrid_stack_spec.submodules
             return HybridStack(
                 transformer_config,
@@ -602,6 +608,7 @@ class TestTECudaGraphHelper:
             pipeline_dtype=torch.bfloat16,
             context_parallel_size=1,
         )
+        transformer_config.finalize()
 
         # Create model
         torch.manual_seed(123)
@@ -1127,7 +1134,7 @@ class TestInlineCaptureManager:
     """Tests for CudaGraphManager with inline_capture, function_name, eager, and cache_key."""
 
     def _make_config(self):
-        return TransformerConfig(
+        cfg = TransformerConfig(
             num_layers=1,
             hidden_size=32,
             num_attention_heads=1,
@@ -1135,6 +1142,8 @@ class TestInlineCaptureManager:
             cuda_graph_impl="local",
             inference_rng_tracker=True,
         )
+        cfg.finalize()
+        return cfg
 
     def setup_method(self, method):
         Utils.initialize_model_parallel()

@@ -36,6 +36,7 @@ class TestParallelSequentialMLP:
             moe_router_topk=1,
             add_bias_linear=False,
         )
+        transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_local_submodules(num_experts=num_moe_experts, moe_grouped_gemm=False).mlp
         )
@@ -91,6 +92,7 @@ class TestTEParallelSequentialMLP:
             sequence_parallel=True,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
 
         self.local_mlp_spec = MLPSubmodules(
             linear_fc1=ColumnParallelLinear, linear_fc2=RowParallelLinear

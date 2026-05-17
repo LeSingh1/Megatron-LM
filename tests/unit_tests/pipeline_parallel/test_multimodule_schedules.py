@@ -129,6 +129,7 @@ def create_transformer_block(hidden_size, pg_collection, dtype=torch.bfloat16):
         hidden_dropout=0.0,
         bf16=(dtype == torch.bfloat16),
     )
+    config.finalize()
 
     block = (
         TransformerBlock(
@@ -144,6 +145,7 @@ def create_transformer_block(hidden_size, pg_collection, dtype=torch.bfloat16):
                 mod.bias.zero_()
 
     ddp_config = DistributedDataParallelConfig(overlap_grad_reduce=True, bucket_size=10000)
+    ddp_config.finalize()
     block = DistributedDataParallel(
         config=block.config, ddp_config=ddp_config, module=block, pg_collection=pg_collection
     )
@@ -374,6 +376,7 @@ def run_multimodule_schedule_test(
 
     # Configure
     config = ModelParallelConfig(pipeline_dtype=torch.bfloat16)
+    config.finalize()
     config.variable_seq_lengths = True
     config.calculate_per_token_loss = False
     config.fine_grained_activation_offloading = False

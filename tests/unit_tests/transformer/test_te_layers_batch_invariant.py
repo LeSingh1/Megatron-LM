@@ -113,6 +113,7 @@ def test_te_column_parallel_linear_batch_invariant_randomized():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg.finalize()
 
     layer = (
         TEColumnParallelLinear(
@@ -159,6 +160,7 @@ def test_te_row_parallel_linear_batch_invariant_randomized():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg.finalize()
 
     layer = (
         TERowParallelLinear(
@@ -205,6 +207,7 @@ def test_te_layernorm_column_parallel_linear_batch_invariant_randomized():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg.finalize()
 
     layer = (
         TELayerNormColumnParallelLinear(
@@ -251,6 +254,7 @@ def test_te_norm_batch_invariant_randomized():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg.finalize()
 
     layer = TENorm(config=cfg, hidden_size=cfg.hidden_size, eps=cfg.layernorm_epsilon).cuda().eval()
 
@@ -284,6 +288,7 @@ def test_column_parallel_linear_batch_invariant_randomized():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg.finalize()
 
     layer = (
         ColumnParallelLinear(
@@ -337,6 +342,7 @@ def test_te_attention_layer_batch_invariant_randomized():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg.finalize()
 
     attn = TEDotProductAttention(
         config=cfg, layer_number=1, attn_mask_type=AttnMaskType.causal, attention_type="self"
@@ -427,6 +433,7 @@ def test_te_column_parallel_linear_parity():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg_bik.finalize()
 
     cfg_regular = TransformerConfig(
         num_layers=1,
@@ -441,6 +448,7 @@ def test_te_column_parallel_linear_parity():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg_regular.finalize()
 
     # Create layers with same weights
     torch.manual_seed(456)
@@ -522,6 +530,7 @@ def test_te_rmsnorm_parity():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg_bik.finalize()
 
     cfg_regular = TransformerConfig(
         num_layers=1,
@@ -536,6 +545,7 @@ def test_te_rmsnorm_parity():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg_regular.finalize()
 
     # Create layers with same weights
     torch.manual_seed(789)
@@ -601,6 +611,7 @@ def test_te_layernorm_linear_parity():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg_bik.finalize()
 
     cfg_regular = TransformerConfig(
         num_layers=1,
@@ -615,6 +626,7 @@ def test_te_layernorm_linear_parity():
         layernorm_epsilon=1e-5,
         attention_backend=AttnBackend.flash,
     )
+    cfg_regular.finalize()
 
     torch.manual_seed(321)
     layer_bik = TELayerNormColumnParallelLinear(

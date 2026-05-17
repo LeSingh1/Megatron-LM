@@ -143,6 +143,7 @@ class TestParallelMLAAttention:
             rotary_base=10000,
             original_max_position_embeddings=32,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(),
@@ -342,6 +343,7 @@ class TestParallelMLAAttention:
                 rotary_base=self.transformer_config.rotary_base,
                 original_max_position_embeddings=self.transformer_config.original_max_position_embeddings,
             )
+            transformer_config.finalize()
             mismatch_attention = MLASelfAttention(
                 transformer_config,
                 get_mla_self_attn_submodules(),
@@ -493,6 +495,7 @@ class TestSequenceParallelMLAAttention:
             tensor_model_parallel_size=self.tensor_parallel_size,
             sequence_parallel=True,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(linear_qkv_down_proj=linear_qkv_down_proj),
@@ -550,6 +553,7 @@ class TestTensorParallelMLAAttention:
             tensor_model_parallel_size=self.tensor_parallel_size,
             sequence_parallel=False,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(linear_qkv_down_proj=linear_qkv_down_proj),
@@ -621,6 +625,7 @@ class TestContextParallelMLAAttention:
             rope_type=rope_type,
             apply_rope_fusion=apply_rope_fusion,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(),
@@ -717,6 +722,7 @@ class TestParallelMLAAttentionPrecision:
             hidden_dropout=0.0,
             attention_dropout=0.0,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(),
@@ -879,6 +885,7 @@ class TestContextParallelMLAAttentionPrecision:
             hidden_dropout=0.0,
             attention_dropout=0.0,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(),
@@ -1029,6 +1036,7 @@ class TestParallelMLAAttentionPrecisionWithRopeFusion:
             attention_dropout=0.0,
             apply_rope_fusion=True,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = MLASelfAttention(
             self.transformer_config,
             get_mla_self_attn_submodules(),
@@ -1175,6 +1183,7 @@ class TestMLAClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        self.transformer_config.finalize()
 
     def teardown_method(self, method):
         Utils.destroy_model_parallel()
@@ -1197,6 +1206,7 @@ class TestMLAClipQK:
                 original_max_position_embeddings=32,
                 qk_clip=False,
             )
+            config.finalize()
             attention = MLASelfAttention(
                 config,
                 get_mla_self_attn_submodules(),
@@ -1353,6 +1363,7 @@ class TestMLAClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        config.finalize()
         attention = MLASelfAttention(
             config,
             get_mla_self_attn_submodules(),
@@ -1477,6 +1488,7 @@ def test_parallel_multi_latent_attention_correctness(
         hidden_dropout=0.0,
         attention_dropout=0.0,
     )
+    transformer_config.finalize()
 
     with TempNamedDir(tmp_path_dist_ckpt / 'test_parallel_mla', sync=True) as ckpt_dir:
         # Set argument
@@ -1635,6 +1647,7 @@ class TestFusedMLASelfAttention:
             rotary_base=10000,
             original_max_position_embeddings=32,
         )
+        self.transformer_config.finalize()
         self.fused_attention = FusedMLASelfAttention(
             self.transformer_config,
             get_fused_mla_submodules(),
@@ -1738,6 +1751,7 @@ class TestFusedMLAGradientFlow:
             rotary_base=10000,
             original_max_position_embeddings=32,
         )
+        self.transformer_config.finalize()
 
     def teardown_method(self, method):
         Utils.destroy_model_parallel()
@@ -1789,6 +1803,7 @@ class TestFusedMLALoadFromStateDict:
             rotary_base=10000,
             original_max_position_embeddings=32,
         )
+        self.transformer_config.finalize()
 
     def teardown_method(self, method):
         Utils.destroy_model_parallel()
@@ -1876,6 +1891,7 @@ class TestFusedMLARequiresQLora:
             rotary_base=10000,
             original_max_position_embeddings=32,
         )
+        config.finalize()
         with pytest.raises(AssertionError, match="q_lora_rank"):
             FusedMLASelfAttention(
                 config,

@@ -40,6 +40,7 @@ class TestSpecCustomization:
             use_cpu_initialization=True,
             qk_l2_norm=True,
         )
+        self.config.finalize()
 
         # specify Transformer Layer spec with all identity ops
         self.transformer_layer_spec = TransformerLayerSubmodules()
@@ -154,6 +155,7 @@ class TestSpecCustomization:
             use_cpu_initialization=True,
             window_size=(10, 0),
         )
+        config.finalize()
 
         # Test TEDotProductAttention
         attn = TEDotProductAttention(
@@ -205,6 +207,7 @@ class TestSpecCustomization:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         submodules = get_gpt_layer_local_submodules()
 
         # The following way can be used to pass a different `TransformerLayer`

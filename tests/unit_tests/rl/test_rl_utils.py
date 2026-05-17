@@ -50,6 +50,7 @@ class MockModel(LanguageModule):
         self.config = TransformerConfig(
             num_attention_heads=8, num_layers=8, pipeline_dtype=torch.bfloat16
         )
+        self.config.finalize()
         self.model_type = ModelType.encoder_or_decoder
 
     def __call__(self, x, position_ids, attention_mask, **kwargs):
@@ -542,6 +543,7 @@ class TestRLUtils:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),
@@ -555,6 +557,7 @@ class TestRLUtils:
             overlap_grad_reduce=False,
             bucket_size=None,  # Single bucket for simplicity
         )
+        ddp_config.finalize()
 
         ddp_model = DistributedDataParallel(
             transformer_config, ddp_config=ddp_config, module=gpt_model
@@ -601,6 +604,7 @@ class TestRLUtils:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),
@@ -614,6 +618,7 @@ class TestRLUtils:
             overlap_grad_reduce=False,
             bucket_size=None,  # Single bucket for simplicity
         )
+        ddp_config.finalize()
 
         ddp_model = DistributedDataParallel(
             transformer_config, ddp_config=ddp_config, module=gpt_model
@@ -623,6 +628,7 @@ class TestRLUtils:
         optimizer_config = OptimizerConfig(
             optimizer='adam', bf16=True, use_distributed_optimizer=True
         )
+        optimizer_config.finalize()
         optimizer = get_megatron_optimizer(optimizer_config, [ddp_model])
 
         # Manually initialize optimizer state (simulating what happens after first step)
@@ -726,6 +732,7 @@ class TestRLUtils:
             bf16=True,
             pipeline_dtype=torch.bfloat16,  # Without this, pp!=1 runs will fail.
         )
+        transformer_config.finalize()
         vocab_size = 10_000
         pp_group = ProcessGroupCollection.use_mpu_process_groups().pp
         gpt_model = GPTModel(
@@ -797,6 +804,7 @@ class TestRLUtils:
             cuda_graph_impl="local",
             bf16=True,
         )
+        transformer_config.finalize()
         model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),

@@ -217,16 +217,15 @@ def test_save_checkpoint(init_model_parallel, create_args, tmp_path_dist_ckpt, c
 
     iteration = 123
     config = TransformerConfig(num_layers=1, kv_channels=1)
+    config.finalize()
     model = MockModel(config)
     optimizer = MockState({"optimizer": "optimizer_state"})
     if ckpt_format == "fsdp_dtensor":
-        model = FullyShardedDataParallel(
-            config=config,
-            ddp_config=DistributedDataParallelConfig(
-                use_distributed_optimizer=True, use_megatron_fsdp=True
-            ),
-            module=model,
+        _ddp_cfg = DistributedDataParallelConfig(
+            use_distributed_optimizer=True, use_megatron_fsdp=True
         )
+        _ddp_cfg.finalize()
+        model = FullyShardedDataParallel(config=config, ddp_config=_ddp_cfg, module=model)
         optimizer = MockState({"state": {}})
     opt_param_scheduler = MockState({"opt_param_scheduler": "scheduler_state"})
     num_floating_point_operations_so_far = 456
@@ -274,6 +273,7 @@ def test_load_checkpoint(
         # Create and save a checkpoint first.
         iteration = 123
         config = TransformerConfig(num_layers=1, kv_channels=1)
+        config.finalize()
         model = MockModel(config)
 
         optimizer = MockState({"optimizer": "optimizer_state"})
@@ -321,6 +321,7 @@ def test_dist_checkpoint_versioning(init_model_parallel, tmp_path_dist_ckpt, cre
         # Create and save a checkpoint first.
         iteration = 123
         config = TransformerConfig(num_layers=1, kv_channels=1)
+        config.finalize()
         model = MockModel(config)
 
         optimizer = MockState({"optimizer": "optimizer_state"})

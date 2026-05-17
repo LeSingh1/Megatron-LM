@@ -55,6 +55,7 @@ class TestDistributedDataParallel:
 
         # Setup DDP config
         ddp_config = DistributedDataParallelConfig(overlap_grad_reduce=True, bucket_size=10000)
+        ddp_config.finalize()
 
         # Create two identical models
         model1 = TestModel(input_dim=input_dim, output_dim=output_dim).cuda()
@@ -68,6 +69,7 @@ class TestDistributedDataParallel:
         transformer_config = TransformerConfig(
             num_attention_heads=1, num_layers=1, context_parallel_size=1
         )
+        transformer_config.finalize()
 
         ddp_model1 = DistributedDataParallel(
             transformer_config, ddp_config=ddp_config, module=model1

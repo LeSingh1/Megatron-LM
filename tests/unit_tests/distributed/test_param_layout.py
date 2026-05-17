@@ -227,7 +227,9 @@ class TestDistOptParamLayout:
             average_in_collective=False,
         )
         defaults.update(overrides)
-        return DistributedDataParallelConfig(**defaults)
+        cfg = DistributedDataParallelConfig(**defaults)
+        cfg.finalize()
+        return cfg
 
     def test_param_start_64_alignment(self):
         """Each param's start index should be 64-aligned."""
@@ -392,7 +394,9 @@ class TestComputeFullParamLayout:
             average_in_collective=False,
         )
         defaults.update(overrides)
-        return DistributedDataParallelConfig(**defaults)
+        cfg = DistributedDataParallelConfig(**defaults)
+        cfg.finalize()
+        return cfg
 
     def test_dense_only(self):
         """With only dense params, should produce a single layout."""

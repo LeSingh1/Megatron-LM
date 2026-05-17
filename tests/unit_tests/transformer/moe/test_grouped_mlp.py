@@ -49,6 +49,7 @@ class TestTEGroupedMLP:
             moe_router_load_balancing_type="sinkhorn",
             moe_router_topk=1,
         )
+        tf_config.finalize()
 
         self.fc1_ffn_hidden_size = tf_config.ffn_hidden_size
         self.fc2_ffn_hidden_size = tf_config.ffn_hidden_size

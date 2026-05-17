@@ -32,6 +32,7 @@ class TestAllReduceLNGrads:
             qk_layernorm=True,
             pipeline_dtype=torch.float32,
         )
+        self.transformer_config.finalize()
 
         self.model = GPTModel(
             config=self.transformer_config,
@@ -60,6 +61,7 @@ class TestAllReduceLNGrads:
         self.init_model()
         self.model.cuda()
         self.model.ddp_config = DistributedDataParallelConfig()
+        self.model.ddp_config.finalize()
 
         for param in self.model.parameters():
             if freeze_model:
@@ -84,6 +86,7 @@ class TestAllReduceLNGrads:
         self.init_model(share_embeddings)
         self.model.cuda()
         self.model.ddp_config = DistributedDataParallelConfig()
+        self.model.ddp_config.finalize()
 
         for param in self.model.parameters():
             if freeze_model:

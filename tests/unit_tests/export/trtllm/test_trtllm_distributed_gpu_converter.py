@@ -41,6 +41,7 @@ class TestTRTLLMDistributedGPUConverter:
             add_qkv_bias=False,
             add_bias_linear=False,
         )
+        transformer_config.finalize()
         self.gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_local_spec(),

@@ -68,6 +68,7 @@ class StaticInferenceEngineTestHarness:
             params_dtype=inference_config_params_dtype,
             add_bias_linear=expert_model_parallel_size == 1,
         )
+        transformer_config.finalize()
 
         gpt_model = GPTModel(
             config=transformer_config,

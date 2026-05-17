@@ -255,6 +255,7 @@ class TestTransformerBlockWithProcessGroups:
             bf16=True,
             context_parallel_size=cp_size,
         )
+        transformer_config.finalize()
 
         # Create a transformer block with default process groups
         default_block = (
@@ -305,6 +306,7 @@ class TestTransformerBlockWithProcessGroups:
 
         # wrap with DDP
         ddp_config = DistributedDataParallelConfig(overlap_grad_reduce=True, bucket_size=10000)
+        ddp_config.finalize()
         default_block = DistributedDataParallel(
             config=transformer_config, ddp_config=ddp_config, module=default_block
         )
@@ -408,6 +410,7 @@ class TestTransformerBlockWithProcessGroups:
             bf16=True,
             context_parallel_size=attn_cp_size,
         )
+        transformer_config.finalize()
 
         # Create custom process groups
         # Initialize torch.distributed if not already initialized
@@ -505,6 +508,7 @@ class TestTransformerBlockWithProcessGroups:
             hidden_dropout=0.0,
             context_parallel_size=2,
         )
+        transformer_config.finalize()
         transformer_block_cp2_tp4 = (
             TransformerBlock(
                 transformer_config,
@@ -554,6 +558,7 @@ class TestTransformerBlockWithProcessGroups:
         )
 
         ddp_config = DistributedDataParallelConfig(overlap_grad_reduce=True, bucket_size=10000)
+        ddp_config.finalize()
         transformer_block_cp2_tp2_dp_2 = DistributedDataParallel(
             config=transformer_config,
             ddp_config=ddp_config,
@@ -654,6 +659,7 @@ class TestTransformerBlockWithProcessGroups:
             context_parallel_size=1,
             ffn_hidden_size=4 * 4096,
         )
+        transformer_config.finalize()
 
         default_mlp_spec = ModuleSpec(
             module=MLP,
@@ -682,6 +688,7 @@ class TestTransformerBlockWithProcessGroups:
         copy_weights_to_tp_mlp(reference_mlp, custom_mlp, tp_group)
 
         ddp_config = DistributedDataParallelConfig(overlap_grad_reduce=True, bucket_size=10000)
+        ddp_config.finalize()
 
         default_mlp = DistributedDataParallel(
             config=transformer_config, ddp_config=ddp_config, module=default_mlp
@@ -730,6 +737,7 @@ class TestTransformerBlockWithProcessGroups:
             hidden_dropout=0.0,
             attention_backend=AttnBackend.unfused,
         )
+        transformer_config.finalize()
 
         transformer_config_2 = copy.deepcopy(transformer_config)
 

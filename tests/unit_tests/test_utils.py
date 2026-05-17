@@ -266,10 +266,11 @@ def test_param_norm_linear(use_distributed_optimizer: bool):
     model.requires_grad_(True)
     model.weight.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=use_distributed_optimizer)
+    ddp_config.finalize()
     # Use dummy TransformerConfig which doesn't trigger __post_init__ assertions.
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-    )
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config, model)
     for param in model.parameters():
         assert param.requires_grad
     mock_args = SimpleNamespace(bf16=True)
@@ -287,6 +288,7 @@ def test_param_norm_linear(use_distributed_optimizer: bool):
         optimizer_config = OptimizerConfig(
             bf16=True, use_distributed_optimizer=use_distributed_optimizer
         )
+        optimizer_config.finalize()
         _ = get_megatron_optimizer(optimizer_config, [model])
         for param in model.parameters():
             assert hasattr(param, 'main_param')
@@ -328,6 +330,7 @@ def test_param_norm_moe(use_distributed_optimizer: bool):
         add_bias_linear=False,
         bf16=True,
     )
+    transformer_config.finalize()
     submodules = get_submodules(
         get_gpt_layer_with_transformer_engine_submodules(num_experts=2, moe_grouped_gemm=True).mlp
     )
@@ -338,6 +341,7 @@ def test_param_norm_moe(use_distributed_optimizer: bool):
     for param in model.parameters():
         param.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=use_distributed_optimizer)
+    ddp_config.finalize()
     model = DistributedDataParallel(transformer_config, ddp_config, model)
     for param in model.parameters():
         assert param.requires_grad
@@ -353,6 +357,7 @@ def test_param_norm_moe(use_distributed_optimizer: bool):
         optimizer_config = OptimizerConfig(
             bf16=True, use_distributed_optimizer=use_distributed_optimizer
         )
+        optimizer_config.finalize()
         _ = get_megatron_optimizer(optimizer_config, [model])
         for param in model.parameters():
             # Only bf16/fp16 parameters get main_param attribute.

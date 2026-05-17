@@ -28,6 +28,7 @@ class TestTPAttributesWithoutInitialization:
             use_cpu_initialization=use_cpu_init,
             perform_initialization=False,
         )
+        cfg.finalize()
 
         emb = VocabParallelEmbedding(
             num_embeddings=16, embedding_dim=8, init_method=cfg.init_method, config=cfg
@@ -48,6 +49,7 @@ class TestTPAttributesWithoutInitialization:
             use_cpu_initialization=use_cpu_init,
             perform_initialization=False,
         )
+        cfg.finalize()
 
         layer = ColumnParallelLinear(
             input_size=8,
@@ -73,6 +75,7 @@ class TestTPAttributesWithoutInitialization:
             use_cpu_initialization=use_cpu_init,
             perform_initialization=False,
         )
+        cfg.finalize()
 
         layer = RowParallelLinear(
             input_size=8,

@@ -59,6 +59,7 @@ def initialize_gpt_model(
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs)
+    transformer_config.finalize()
     if is_moe:
         transformer_config.moe_layer_freq = [0, 1, 1, 1, 1, 0, 1, 0]
         transformer_config.moe_ffn_hidden_size = 128

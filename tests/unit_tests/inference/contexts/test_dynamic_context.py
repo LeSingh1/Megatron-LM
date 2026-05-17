@@ -92,13 +92,15 @@ class TestDynamicContext:
         else:
             mamba_inference_state_config = None
 
+        _model_config = TransformerConfig(
+            params_dtype=params_dtype,
+            num_layers=num_layers,
+            kv_channels=kv_channels,
+            num_attention_heads=num_attention_heads,
+        )
+        _model_config.finalize()
         dynamic_context = DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=params_dtype,
-                num_layers=num_layers,
-                kv_channels=kv_channels,
-                num_attention_heads=num_attention_heads,
-            ),
+            model_config=_model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=max_sequence_length,
                 num_cuda_graphs=num_cuda_graphs,
@@ -1334,16 +1336,18 @@ class TestDynamicContext:
                 params_dtype,
             )
 
+        _model_config = TransformerConfig(
+            params_dtype=params_dtype,
+            num_layers=10,
+            kv_channels=64,
+            num_attention_heads=8,
+            pipeline_model_parallel_size=pp_size,
+            tensor_model_parallel_size=1,
+            pipeline_dtype=params_dtype,
+        )
+        _model_config.finalize()
         context = DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=params_dtype,
-                num_layers=10,
-                kv_channels=64,
-                num_attention_heads=8,
-                pipeline_model_parallel_size=pp_size,
-                tensor_model_parallel_size=1,
-                pipeline_dtype=params_dtype,
-            ),
+            model_config=_model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=128,
                 buffer_size_gb=0.1,
@@ -1399,13 +1403,15 @@ class TestDynamicContext:
             params_dtype,
         )
 
+        _model_config = TransformerConfig(
+            params_dtype=params_dtype,
+            num_layers=2,  # 1 Attn, 1 Mamba
+            kv_channels=kv_channels,
+            num_attention_heads=num_attention_heads,
+        )
+        _model_config.finalize()
         context = DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=params_dtype,
-                num_layers=2,  # 1 Attn, 1 Mamba
-                kv_channels=kv_channels,
-                num_attention_heads=num_attention_heads,
-            ),
+            model_config=_model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=512,
                 buffer_size_gb=buffer_gb,
@@ -1481,13 +1487,15 @@ class TestDynamicContext:
             params_dtype,
         )
 
+        _model_config = TransformerConfig(
+            params_dtype=params_dtype,
+            num_layers=2,
+            kv_channels=kv_channels,
+            num_attention_heads=num_attention_heads,
+        )
+        _model_config.finalize()
         context = DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=params_dtype,
-                num_layers=2,
-                kv_channels=kv_channels,
-                num_attention_heads=num_attention_heads,
-            ),
+            model_config=_model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=512,
                 buffer_size_gb=buffer_gb,
@@ -1525,13 +1533,15 @@ class TestDynamicContext:
         # With max_requests=1, more memory goes to KV blocks than with max_requests=64.
         # Verify we get more blocks with fewer requests.
         if max_requests == 1:
+            _model_config_many = TransformerConfig(
+                params_dtype=params_dtype,
+                num_layers=2,
+                kv_channels=kv_channels,
+                num_attention_heads=num_attention_heads,
+            )
+            _model_config_many.finalize()
             context_many = DynamicInferenceContext(
-                model_config=TransformerConfig(
-                    params_dtype=params_dtype,
-                    num_layers=2,
-                    kv_channels=kv_channels,
-                    num_attention_heads=num_attention_heads,
-                ),
+                model_config=_model_config_many,
                 inference_config=InferenceConfig(
                     max_sequence_length=512,
                     buffer_size_gb=buffer_gb,
@@ -1560,6 +1570,7 @@ class TestDynamicContext:
             num_attention_heads=8,
             tensor_model_parallel_size=tp_size,
         )
+        model_config.finalize()
 
         inference_config = InferenceConfig(
             max_sequence_length=512, buffer_size_gb=0.1, block_size_tokens=128, max_requests=1
@@ -1666,6 +1677,7 @@ class TestDynamicContext:
             num_query_groups=2,  # GQA = 2
             tensor_model_parallel_size=tp_size,
         )
+        model_config.finalize()
 
         # max_requests must be divisible by TP size (8) and REQUEST_ROUNDER
         inference_config = InferenceConfig(
@@ -1873,6 +1885,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=128,
             buffer_size_gb=0.01,
@@ -1926,6 +1939,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=1024,
             buffer_size_gb=0.1,
@@ -1998,6 +2012,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=1024,
             buffer_size_gb=0.1,
@@ -2067,6 +2082,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=128,
             buffer_size_gb=0.01,
@@ -2086,6 +2102,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=128,
             buffer_size_gb=0.01,
@@ -2119,6 +2136,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=128,
             buffer_size_gb=0.01,
@@ -2174,6 +2192,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.05,
@@ -2247,6 +2266,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=128,
             buffer_size_gb=0.01,
@@ -2325,6 +2345,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2388,6 +2409,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2437,6 +2459,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2494,6 +2517,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2571,6 +2595,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2646,6 +2671,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.01,
@@ -2693,6 +2719,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2752,6 +2779,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -2826,6 +2854,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=128,
             buffer_size_gb=0.1,
@@ -2902,6 +2931,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=32,
             buffer_size_gb=0.1,
@@ -2961,6 +2991,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.1,
@@ -3033,6 +3064,7 @@ class TestDynamicContext:
         model_config = TransformerConfig(
             params_dtype=torch.float32, num_layers=2, kv_channels=8, num_attention_heads=2
         )
+        model_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=512,
             buffer_size_gb=0.05,

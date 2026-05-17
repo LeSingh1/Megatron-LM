@@ -197,6 +197,7 @@ class TestRouterAuxLoss:
             params_dtype=torch.bfloat16,
             add_bias_linear=False,
         )
+        self.default_transformer_config.finalize()
 
     def new_router(self, **kwargs):
         """Create a new router with updated configuration.
@@ -621,6 +622,7 @@ class TestPaddingMaskAuxLoss:
             context_parallel_size=cp_size,
             sequence_parallel=sequence_parallel and tp_size > 1,
         )
+        self.default_transformer_config.finalize()
 
     def new_router(self, **kwargs):
         """Create a new router with updated configuration."""

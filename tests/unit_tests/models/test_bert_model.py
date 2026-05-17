@@ -38,6 +38,7 @@ class TestBertModel:
             pipeline_dtype=torch.bfloat16,
             attention_backend=AttnBackend.unfused,
         )
+        transformer_config.finalize()
         self.bert_model = BertModel(
             config=transformer_config,
             num_tokentypes=0,
@@ -109,6 +110,7 @@ class TestBertModelAttentionDimensions:
             pipeline_dtype=torch.bfloat16,
             attention_backend=AttnBackend.auto,
         )
+        self.transformer_config.finalize()
         # This should convert arbitray mask to padding mask
         self.bert_model = BertModel(
             config=self.transformer_config,

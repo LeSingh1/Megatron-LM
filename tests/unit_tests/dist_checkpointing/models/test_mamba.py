@@ -44,6 +44,7 @@ def initialize_mamba(seed, glu=True, **config_kwargs):
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs)
+    transformer_config.finalize()
     submodules = MambaMixerSubmodules(
         in_proj=TELayerNormColumnParallelLinear, out_proj=TERowParallelLinear
     )

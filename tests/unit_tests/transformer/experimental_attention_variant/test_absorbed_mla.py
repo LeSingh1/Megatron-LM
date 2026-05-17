@@ -124,7 +124,7 @@ def get_mock_mla_config(
     tensor_model_parallel_size: int, context_parallel_size: int
 ) -> MLATransformerConfig:
     """Create test config with all attributes used in MLA."""
-    return MLATransformerConfig(
+    cfg = MLATransformerConfig(
         multi_latent_attention=True,
         hidden_size=7168,
         num_attention_heads=128,
@@ -174,6 +174,8 @@ def get_mock_mla_config(
         experimental_attention_variant=None,
         softmax_scale=None,
     )
+    cfg.finalize()
+    return cfg
 
 
 def get_absorbed_mla_submodules(

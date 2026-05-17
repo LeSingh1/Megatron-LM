@@ -229,12 +229,14 @@ def _mamba_layer_pattern(base: str, num_layers: int, pp_size: int) -> str:
 
 
 def _mp_config() -> ModelParallelConfig:
-    return ModelParallelConfig(
+    mp_cfg = ModelParallelConfig(
         params_dtype=torch.float32,
         use_cpu_initialization=True,
         sequence_parallel=False,
         gradient_accumulation_fusion=False,
     )
+    mp_cfg.finalize()
+    return mp_cfg
 
 
 def _set_pg_collection(module, tp_group, dp_group):
@@ -336,6 +338,7 @@ def test_swap_gpt_parametrized(
         moe_token_dispatcher_type="alltoall",
         num_query_groups=4,
     )
+    cfg.finalize()
 
     # Build PGs and models (always use unified PG builder so we can set EP)
     src_pgs = _build_pg_collection(tp_size=src_tp, pp_size=src_pp, ep_size=src_ep)
@@ -518,6 +521,7 @@ def test_router_expert_bias_refit(
         moe_router_enable_expert_bias=True,
         moe_router_score_function="sigmoid",
     )
+    cfg.finalize()
     src_cfg = copy.deepcopy(cfg)
     dst_cfg = copy.deepcopy(cfg)
     src_cfg.expert_model_parallel_size = src_ep
@@ -674,6 +678,7 @@ def test_router_expert_bias_refit_non_collocated(refit_backend: str):
         moe_router_enable_expert_bias=True,
         moe_router_score_function="sigmoid",
     )
+    cfg.finalize()
     src_cfg = copy.deepcopy(cfg)
     dst_cfg = copy.deepcopy(cfg)
     src_cfg.expert_model_parallel_size = src_ep
@@ -844,6 +849,7 @@ def test_swap_mamba_parametrized(
         hidden_dropout=0.0,
         attention_dropout=0.0,
     )
+    cfg.finalize()
 
     src_pgs = _build_pg_collection(tp_size=src_tp, pp_size=src_pp)
     dst_pgs = _build_pg_collection(tp_size=dst_tp, pp_size=dst_pp)

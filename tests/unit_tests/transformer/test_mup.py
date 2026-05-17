@@ -36,6 +36,7 @@ class TestMuPConfigValidation:
             use_mup=True,
             # mup_base_hidden_size not set - should default to hidden_size
         )
+        config.finalize()
         assert config.mup_base_hidden_size == 512
         assert config.mup_width_mult == 1.0
 
@@ -48,6 +49,7 @@ class TestMuPConfigValidation:
             use_mup=True,
             mup_base_hidden_size=256,
         )
+        config.finalize()
         assert config.mup_width_mult == 4.0
 
     def test_mup_width_mult_fractional(self):
@@ -59,11 +61,13 @@ class TestMuPConfigValidation:
             use_mup=True,
             mup_base_hidden_size=256,
         )
+        config.finalize()
         assert config.mup_width_mult == 0.5
 
     def test_mup_backward_compatible(self):
         """Default config unchanged when MuP disabled."""
         config = TransformerConfig(hidden_size=512, num_layers=4, num_attention_heads=8)
+        config.finalize()
         assert config.use_mup is False
         assert config.mup_width_mult == 1.0
         assert config.mup_base_hidden_size is None
@@ -71,13 +75,14 @@ class TestMuPConfigValidation:
     def test_mup_base_hidden_size_must_be_positive(self):
         """mup_base_hidden_size must be positive."""
         with pytest.raises(AssertionError) as exc_info:
-            TransformerConfig(
+            _cfg = TransformerConfig(
                 hidden_size=512,
                 num_layers=4,
                 num_attention_heads=8,
                 use_mup=True,
                 mup_base_hidden_size=0,
             )
+            _cfg.finalize()
         assert "positive" in str(exc_info.value).lower()
 
 
@@ -134,6 +139,7 @@ class TestMuPAttentionScaling:
             mup_base_hidden_size=128,
             mup_attn_scale_power=1.0,  # MuP default
         )
+        config.finalize()
         kv_channels = config.kv_channels  # 512 / 8 = 64
 
         expected_scale = 1.0 / kv_channels  # 1/64 = 0.015625
@@ -149,6 +155,7 @@ class TestMuPAttentionScaling:
             mup_base_hidden_size=128,
             mup_attn_scale_power=0.5,  # Standard default
         )
+        config.finalize()
         kv_channels = config.kv_channels  # 64
 
         expected_scale = 1.0 / math.sqrt(kv_channels)  # 1/8 = 0.125
@@ -159,6 +166,7 @@ class TestMuPAttentionScaling:
         config = TransformerConfig(
             hidden_size=512, num_layers=4, num_attention_heads=8, use_mup=False  # MuP disabled
         )
+        config.finalize()
         # softmax_scale defaults to None when MuP is disabled
         # (actual scaling is done in the attention layer)
         assert config.softmax_scale is None
@@ -170,7 +178,7 @@ class TestMuPWarnings:
     def test_mup_warns_with_custom_init_method(self):
         """Warn when MuP is enabled and init_method is user-provided."""
         with pytest.warns(UserWarning, match="use_mup is enabled"):
-            TransformerConfig(
+            _cfg = TransformerConfig(
                 hidden_size=512,
                 num_layers=4,
                 num_attention_heads=8,
@@ -178,11 +186,12 @@ class TestMuPWarnings:
                 mup_base_hidden_size=128,
                 init_method=init_method_normal(0.01),
             )
+            _cfg.finalize()
 
     def test_mup_warns_with_custom_output_layer_init_method(self):
         """Warn when MuP is enabled and output_layer_init_method is user-provided."""
         with pytest.warns(UserWarning, match="use_mup is enabled"):
-            TransformerConfig(
+            _cfg = TransformerConfig(
                 hidden_size=512,
                 num_layers=4,
                 num_attention_heads=8,
@@ -190,6 +199,7 @@ class TestMuPWarnings:
                 mup_base_hidden_size=128,
                 output_layer_init_method=init_method_normal(0.01),
             )
+            _cfg.finalize()
 
 
 class TestMuPLRScaling:
@@ -198,6 +208,7 @@ class TestMuPLRScaling:
     def test_mup_lr_override_computation(self):
         """Hidden LR and Adam eps scale as 1/width_mult."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5)
+        optimizer_config.finalize()
         width_mult = 4.0
 
         overrides = get_mup_config_overrides(optimizer_config, width_mult)
@@ -218,6 +229,7 @@ class TestMuPLRScaling:
     def test_mup_lr_no_scaling_at_unity(self):
         """No LR scaling when width_mult=1.0."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5)
+        optimizer_config.finalize()
         width_mult = 1.0
 
         overrides = get_mup_config_overrides(optimizer_config, width_mult)
@@ -234,6 +246,7 @@ class TestMuPLRScaling:
         - Output layer: base LR when tagged as embedding-class (Table 8 symmetry)
         """
         optimizer_config = OptimizerConfig(lr=1e-3)
+        optimizer_config.finalize()
         width_mult = 4.0
 
         overrides = get_mup_config_overrides(optimizer_config, width_mult)
@@ -276,6 +289,7 @@ class TestMuPLRScaling:
         optimizer_config = OptimizerConfig(
             lr=1e-3, min_lr=1e-5, decoupled_lr=2e-4, decoupled_min_lr=2e-6
         )
+        optimizer_config.finalize()
         width_mult = 4.0
 
         standard_overrides = get_standard_config_overrides(optimizer_config)
@@ -364,6 +378,7 @@ class TestMuPConfigIntegration:
             use_mup=True,
             mup_base_hidden_size=256,
         )
+        config.finalize()
 
         tensor = torch.empty(1000, 1000)
         config.output_layer_init_method(tensor)
@@ -383,6 +398,7 @@ class TestMuPOptimizerTypeHandling:
     def test_sgd_scales_vector_like_lr_only(self):
         """SGD scales vector-like params by width_mult; hidden params keep base LR."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5)
+        optimizer_config.finalize()
         width_mult = 4.0
 
         for sgd_variant in ['sgd', 'SGD', 'Sgd']:
@@ -413,6 +429,7 @@ class TestMuPOptimizerTypeHandling:
         optimizer_config = OptimizerConfig(
             lr=1e-3, min_lr=1e-5, decoupled_lr=2e-4, decoupled_min_lr=2e-6
         )
+        optimizer_config.finalize()
         width_mult = 4.0
 
         standard_overrides = get_standard_config_overrides(optimizer_config)
@@ -487,6 +504,7 @@ class TestMuPOptimizerTypeHandling:
     def test_adam_scales_lr_by_default(self):
         """Adam optimizer should scale LR and eps; default optimizer_type is adam."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5)
+        optimizer_config.finalize()
         width_mult = 4.0
 
         # Explicit adam
@@ -508,6 +526,7 @@ class TestMuPOptimizerTypeHandling:
     def test_non_adam_does_not_set_eps_override(self):
         """Non-Adam optimizers should not receive MuP epsilon overrides."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5)
+        optimizer_config.finalize()
         width_mult = 4.0
 
         for non_adam_optimizer in ['muon', 'dist_muon']:
@@ -524,6 +543,7 @@ class TestMuPOptimizerTypeHandling:
     def test_muon_excludes_muon_managed_matrices_from_mup_overrides(self, optimizer_type):
         """Muon-managed 2D params should use Muon scaling only, not MuP LR overrides."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5, muon_scale_mode='unit_rms_norm')
+        optimizer_config.finalize()
         width_mult = 4.0
 
         overrides = get_mup_config_overrides(
@@ -577,6 +597,7 @@ class TestMuPOptimizerTypeHandling:
     def test_muon_warns_for_spectral_scale_mode(self, optimizer_type):
         """Muon+MuP should warn when scale mode is spectral."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5, muon_scale_mode='spectral')
+        optimizer_config.finalize()
         width_mult = 4.0
 
         with patch('megatron.core.optimizer.log_single_rank') as mock_warn:
@@ -595,6 +616,7 @@ class TestMuPOptimizerTypeHandling:
     def test_muon_unit_rms_norm_mode_has_no_warning(self, optimizer_type):
         """Muon+MuP should not warn when scale mode is unit_rms_norm."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5, muon_scale_mode='unit_rms_norm')
+        optimizer_config.finalize()
         width_mult = 4.0
 
         with patch('megatron.core.optimizer.log_single_rank') as mock_warn:
@@ -609,6 +631,7 @@ class TestMuPOptimizerTypeHandling:
     def test_muon_warns_for_spectral_mode_at_unity_width_mult(self, optimizer_type):
         """Muon+MuP warning should still fire when width_mult==1.0."""
         optimizer_config = OptimizerConfig(lr=1e-3, min_lr=1e-5, muon_scale_mode='spectral')
+        optimizer_config.finalize()
         width_mult = 1.0
 
         with patch('megatron.core.optimizer.log_single_rank') as mock_warn:
@@ -630,6 +653,7 @@ class TestMuPMTPLossScaling:
         config = TransformerConfig(
             hidden_size=8, num_layers=2, num_attention_heads=2, mtp_num_layers=1
         )
+        config.finalize()
         hidden_states = torch.ones(2, 1, 4)
         labels = torch.ones(1, 4, dtype=torch.long)
         loss_mask = torch.ones_like(labels, dtype=torch.float32)

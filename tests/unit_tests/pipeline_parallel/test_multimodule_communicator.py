@@ -71,6 +71,7 @@ class TestMultiModulePipelineCommunicator:
             'generator': [],
         }
         config = ModelParallelConfig(bf16=True)
+        config.finalize()
         # Initialize communicator
         mllm_comm = MultiModulePipelineCommunicator(module_to_grid_map, topology, config)
         # Test attributes match expectations
@@ -138,6 +139,7 @@ class TestMultiModulePipelineCommunicator:
             'generator': [],
         }
         config = ModelParallelConfig(pipeline_dtype=torch.float)
+        config.finalize()
         mllm_comm = MultiModulePipelineCommunicator(module_to_grid_map, topology, config)
 
         # Simulate forward communication for each module
@@ -185,6 +187,7 @@ class TestMultiModulePipelineCommunicator:
         }
         topology = {'image_encoder': ['llm'], 'audio_encoder': ['llm'], 'llm': []}
         config = ModelParallelConfig(pipeline_dtype=torch.float)
+        config.finalize()
         mllm_comm = MultiModulePipelineCommunicator(module_to_grid_map, topology, config)
 
         # Simulate forward communication for each module
@@ -245,6 +248,7 @@ class TestMultiModulePipelineCommunicator:
             'generator': [],
         }
         config = ModelParallelConfig(pipeline_dtype=torch.float)
+        config.finalize()
         mllm_comm = MultiModulePipelineCommunicator(module_to_grid_map, topology, config)
 
         # Simulate backward communication for each module
@@ -306,6 +310,7 @@ class TestMultiModulePipelineCommunicator:
             'generator': [],
         }
         config = ModelParallelConfig(pipeline_dtype=torch.float)
+        config.finalize()
         mllm_comm = MultiModulePipelineCommunicator(module_to_grid_map, topology, config)
 
         # Simulate bidirectional send/recv for forward and backward in pipeline
@@ -667,6 +672,7 @@ class TestMultiModulePipelineCommunicator:
             'llm': [],  # llm is the last stage here
         }
         config = ModelParallelConfig(pipeline_dtype=torch.float)
+        config.finalize()
         mllm_comm = MultiModulePipelineCommunicator(
             module_to_grid_map, topology, config, dim_mapping={'s': 0, 'h': 2, 'b': 1}
         )

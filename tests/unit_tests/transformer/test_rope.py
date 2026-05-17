@@ -109,6 +109,7 @@ class TestQKVRotaryEmbedding:
         self.transformer_config = TransformerConfig(
             num_attention_heads=self.num_heads, num_layers=1, apply_rope_fusion=True
         )
+        self.transformer_config.finalize()
 
     def teardown_method(self, method):
         del self.rope_gpu_init

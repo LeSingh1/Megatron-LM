@@ -46,6 +46,7 @@ class TestT5InferenceWrapper:
             pipeline_model_parallel_size=pipeline_parallel_size,
             attention_backend=AttnBackend.unfused,
         )
+        transformer_config.finalize()
 
         encoder_config = deepcopy(transformer_config)
         encoder_config.num_layers = transformer_config.num_layers

@@ -108,10 +108,12 @@ class TestFullyShardedDataParallel:
             megatron_fsdp_main_grads_dtype=main_grads_dtype,
             megatron_fsdp_grad_comm_dtype=grad_comm_dtype,
         )
+        fsdp_config.finalize()
         model = TestModel(input_dim=13, output_dim=17).cuda()
         transformer_config = TransformerConfig(
             num_attention_heads=1, num_layers=1, context_parallel_size=1
         )
+        transformer_config.finalize()
         fsdp_model = FullyShardedDataParallel(
             config=transformer_config,
             ddp_config=fsdp_config,
@@ -225,6 +227,7 @@ class TestFullyShardedDataParallel:
             bucket_size=10000,
             use_megatron_fsdp=True,
         )
+        fsdp_config.finalize()
 
         # Create two identical models
         model1 = TestModel(input_dim=input_dim, output_dim=output_dim).cuda()
@@ -237,6 +240,7 @@ class TestFullyShardedDataParallel:
         transformer_config = TransformerConfig(
             num_attention_heads=1, num_layers=1, context_parallel_size=1  # Explicitly set CP=1
         )
+        transformer_config.finalize()
         fsdp_model1 = FullyShardedDataParallel(
             config=transformer_config,
             ddp_config=fsdp_config,
@@ -256,6 +260,7 @@ class TestFullyShardedDataParallel:
         # Create optimizer config
         lr = 3
         optimizer_config = OptimizerConfig(optimizer="adam", lr=lr)
+        optimizer_config.finalize()
         grad_scaler = None
 
         optimizer1 = DistributedOptimizer(
@@ -335,12 +340,14 @@ class TestFullyShardedDataParallel:
             bucket_size=10000,
             use_megatron_fsdp=True,
         )
+        fsdp_config.finalize()
         input_dim, output_dim = 13, 17
 
         # Dense model: expt_device_mesh should not be built without MoE config
         dense_config = TransformerConfig(
             num_attention_heads=1, num_layers=1, context_parallel_size=1
         )
+        dense_config.finalize()
         dense_model = TestModel(input_dim=input_dim, output_dim=output_dim).cuda()
         fsdp_dense = FullyShardedDataParallel(
             config=dense_config,
@@ -357,6 +364,7 @@ class TestFullyShardedDataParallel:
         moe_config = TransformerConfig(
             num_attention_heads=1, num_layers=1, context_parallel_size=1, num_moe_experts=4
         )
+        moe_config.finalize()
         moe_model = TestModel(input_dim=input_dim, output_dim=output_dim).cuda()
         fsdp_moe = FullyShardedDataParallel(
             config=moe_config,
@@ -420,6 +428,7 @@ class TestFullyShardedDataParallel:
             fsdp_double_buffer=False,
             fsdp_manual_registration=False,
         )
+        baseline_fsdp_config.finalize()
 
         # Setup FSDP config - target fsdp config
         target_fsdp_config = DistributedDataParallelConfig(
@@ -432,6 +441,7 @@ class TestFullyShardedDataParallel:
             fsdp_double_buffer=fsdp_double_buffer,
             fsdp_manual_registration=fsdp_manual_registration,
         )
+        target_fsdp_config.finalize()
 
         # Create two identical models
         model1 = TestModelUniform(hidden_dim=hidden_dim).cuda()
@@ -444,6 +454,7 @@ class TestFullyShardedDataParallel:
         transformer_config = TransformerConfig(
             num_attention_heads=1, num_layers=1, context_parallel_size=1  # Explicitly set CP=1
         )
+        transformer_config.finalize()
         baseline_fsdp_model = FullyShardedDataParallel(
             config=transformer_config,
             ddp_config=baseline_fsdp_config,
@@ -461,6 +472,7 @@ class TestFullyShardedDataParallel:
         # Create optimizer config
         lr = 3
         optimizer_config = OptimizerConfig(optimizer="adam", lr=lr)
+        optimizer_config.finalize()
         grad_scaler = None
 
         optimizer1 = DistributedOptimizer(
@@ -557,11 +569,13 @@ class TestFullyShardedDataParallel:
                 use_megatron_fsdp=True,
                 num_distributed_optimizer_instances=num_fsdp_group,
             )
+            fsdp_config.finalize()
 
             # Wrap first model with default process groups
             transformer_config = TransformerConfig(
                 num_attention_heads=1, num_layers=1, context_parallel_size=1  # Explicitly set CP=1
             )
+            transformer_config.finalize()
             fsdp_model = FullyShardedDataParallel(
                 config=transformer_config,
                 ddp_config=fsdp_config,
@@ -573,6 +587,7 @@ class TestFullyShardedDataParallel:
             # Create optimizer config
             lr = 3
             optimizer_config = OptimizerConfig(optimizer="adam", lr=lr)
+            optimizer_config.finalize()
             grad_scaler = None
 
             if num_fsdp_group > 1:

@@ -347,6 +347,7 @@ class DynamicInferenceEngineTestBase:
                 ),
                 # inference optimized currently only supports RMS Norm
             )
+            transformer_config.finalize()
             if test_config.fp8 or test_config.transformer_impl == "transformer_engine":
                 layer_spec = get_gpt_layer_with_transformer_engine_spec()
             elif test_config.transformer_impl == "local":
@@ -421,6 +422,7 @@ class DynamicInferenceEngineTestBase:
                 ),
                 is_hybrid_model=True,  # Needs to be set for correct out_proj init
             )
+            transformer_config.finalize()
 
             # Hybrid model.
             # When speculative tokens are configured, append MTP depth sections
@@ -4637,6 +4639,7 @@ class TestChunkedPrefillCudaGraphs:
                 pipeline_dtype=torch.bfloat16,
                 add_bias_linear=True,
             )
+            config.finalize()
             model = GPTModel(
                 config=config,
                 transformer_layer_spec=get_gpt_layer_local_spec(),
@@ -4662,6 +4665,7 @@ class TestChunkedPrefillCudaGraphs:
                 add_bias_linear=True,
                 is_hybrid_model=True,
             )
+            config.finalize()
             model = HybridModel(
                 config=config,
                 hybrid_stack_spec=hybrid_stack_spec,

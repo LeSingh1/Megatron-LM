@@ -50,6 +50,7 @@ class Model(torch.nn.Module):
         self.config = TransformerConfig(
             hidden_size=8, num_attention_heads=1, num_layers=1, bf16=True
         )
+        self.config.finalize()
 
     def sharded_state_dict(self):
         sharded_state_dict = self.state_dict(keep_vars=True)
@@ -87,6 +88,7 @@ class SwigluFactoryModel(torch.nn.Module):
         self.config = TransformerConfig(
             hidden_size=8, num_attention_heads=1, num_layers=1, bf16=True
         )
+        self.config.finalize()
         self.pp_separate_model = pp_separate_model
 
     def sharded_state_dict(self):
@@ -129,6 +131,7 @@ class SwigluFactoryModel(torch.nn.Module):
         self.config = TransformerConfig(
             hidden_size=8, num_attention_heads=1, num_layers=1, bf16=True
         )
+        self.config.finalize()
         self.pp_separate_model = pp_separate_model
 
     def sharded_state_dict(self):
@@ -164,6 +167,7 @@ class Model1dFlattenTensor(torch.nn.Module):
         self.config = TransformerConfig(
             hidden_size=128, num_attention_heads=1, num_layers=1, bf16=True
         )
+        self.config.finalize()
         weight_size_per_rank = (
             self.config.hidden_size // parallel_state.get_tensor_model_parallel_world_size()
         )
@@ -313,6 +317,7 @@ def initialize_real_model(
     default_config_kwargs.update(**config_kwargs)
     config_cls = MLATransformerConfig if is_mla else TransformerConfig
     transformer_config = config_cls(**default_config_kwargs)
+    transformer_config.finalize()
 
     if is_moe:
         layer_spec = get_gpt_decoder_block_spec(

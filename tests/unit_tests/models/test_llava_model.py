@@ -40,9 +40,11 @@ class TestLLaVAModel:
             num_attention_heads=self.language_num_attention_heads,
             use_cpu_initialization=False,
         )
+        language_config.finalize()
         vision_config = TransformerConfig(
             num_layers=2, hidden_size=16, num_attention_heads=2, use_cpu_initialization=False
         )
+        vision_config.finalize()
         vision_projection_config = TransformerConfig(
             num_layers=2,
             hidden_size=self.language_hidden_size,
@@ -50,6 +52,7 @@ class TestLLaVAModel:
             num_attention_heads=1,
             use_cpu_initialization=False,
         )
+        vision_projection_config.finalize()
 
         language_layer_submodules = get_gpt_layer_with_transformer_engine_submodules()
         vision_layer_spec = ModuleSpec(
@@ -482,9 +485,11 @@ def setup_and_teardown_llava_model(request):
     language_config = TransformerConfig(
         num_layers=3, hidden_size=128, num_attention_heads=8, use_cpu_initialization=False
     )
+    language_config.finalize()
     vision_config = TransformerConfig(
         num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=False
     )
+    vision_config.finalize()
     vision_projection_config = TransformerConfig(
         num_layers=2,
         hidden_size=128,
@@ -492,6 +497,7 @@ def setup_and_teardown_llava_model(request):
         num_attention_heads=1,
         use_cpu_initialization=False,
     )
+    vision_projection_config.finalize()
 
     language_layer_submodules = get_gpt_layer_with_transformer_engine_submodules()
     vision_layer_spec = ModuleSpec(
@@ -568,6 +574,7 @@ class TestLLaVAModelTokenParallel:
             sequence_parallel=sequence_parallel,
             context_parallel_size=cp_size,
         )
+        language_config.finalize()
         # SP and CP are not yet supported for the Vision Backbone
         vision_config = TransformerConfig(
             num_layers=2,
@@ -578,6 +585,7 @@ class TestLLaVAModelTokenParallel:
             sequence_parallel=False,
             context_parallel_size=1,
         )
+        vision_config.finalize()
         vision_projection_config = TransformerConfig(
             num_layers=2,
             hidden_size=language_hidden_size,
@@ -588,6 +596,7 @@ class TestLLaVAModelTokenParallel:
             sequence_parallel=False,
             context_parallel_size=1,
         )
+        vision_projection_config.finalize()
 
         language_layer_submodules = get_gpt_layer_with_transformer_engine_submodules()
         # SP/CP either requires user to ensure token lengths do not require padding OR change mask type to padding

@@ -67,6 +67,7 @@ def get_model_and_buffers(
         num_distributed_optimizer_instances=num_distributed_optimizer_instances,
         param_name_patterns_for_fp32_local_accumulation=param_name_patterns_for_fp32_local_accumulation,
     )
+    ddp_config.finalize()
     model = TestModel(
         input_dim=input_dim,
         output_dim=output_dim,
@@ -85,11 +86,10 @@ def get_model_and_buffers(
         full_param_layout = DistributedOptimizer.compute_full_param_layout(
             all_params, bucket_size, parallel_state.get_data_parallel_world_size(), ddp_config
         )
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
     model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1),
-        ddp_config=ddp_config,
-        module=model,
-        full_param_layout=full_param_layout,
+        _tcfg, ddp_config=ddp_config, module=model, full_param_layout=full_param_layout
     )
     assert len(model.buffers) == 1
     param_and_grad_buffer = model.buffers[0]
@@ -431,12 +431,13 @@ def test_start_param_sync_dp_size_1():
         overlap_param_gather=True,
         bucket_size=None,
     )
+    ddp_config.finalize()
     module = TestModel(
         input_dim=32, output_dim=32, num_layers=2, bias=False, shared_embedding=False
     ).bfloat16()
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config=ddp_config, module=module
-    )
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config=ddp_config, module=module)
 
     # Confirm dp_size == 1 in the test environment.
     for bg in model.bucket_groups:
@@ -469,14 +470,13 @@ class TestFreeOverlapBuffers:
             overlap_param_gather=True,
             bucket_size=None,
         )
+        ddp_config.finalize()
         module = TestModel(
             input_dim=32, output_dim=32, num_layers=2, bias=False, shared_embedding=False
         ).bfloat16()
-        model = DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1),
-            ddp_config=ddp_config,
-            module=module,
-        )
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        model = DistributedDataParallel(_tcfg, ddp_config=ddp_config, module=module)
         return model
 
     def test_bucket_group_clears_buffers(self):
@@ -566,9 +566,10 @@ class TestFP32LocalGradAccumulation:
         """param_name_patterns_for_fp32_local_accumulation and grad_reduce_in_fp32 are
         mutually exclusive."""
         with pytest.raises(AssertionError):
-            DistributedDataParallelConfig(
+            _cfg = DistributedDataParallelConfig(
                 grad_reduce_in_fp32=True, param_name_patterns_for_fp32_local_accumulation=('all',)
             )
+            _cfg.finalize()
 
     def test_pattern_matching_creates_fp32_main_grad(self):
         """Params matching patterns should get a float32 main_grad and a
@@ -771,6 +772,7 @@ class TestNVFP4IndexMaps:
             bucket_size=bucket_size,
             average_in_collective=False,
         )
+        ddp_config.finalize()
 
         # Pre-compute layout for distributed optimizer (with padding);
         # otherwise use default (no padding).
@@ -953,6 +955,7 @@ def test_expert_parallel_params_get_separate_buffers(use_distributed_optimizer: 
         bucket_size=bucket_size,
         average_in_collective=False,
     )
+    ddp_config.finalize()
     model = TestModelWithExperts(
         input_dim=input_dim,
         output_dim=output_dim,
@@ -968,11 +971,10 @@ def test_expert_parallel_params_get_separate_buffers(use_distributed_optimizer: 
             all_params, bucket_size, parallel_state.get_data_parallel_world_size(), ddp_config
         )
 
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
     ddp_model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1),
-        ddp_config=ddp_config,
-        module=model,
-        full_param_layout=full_param_layout,
+        _tcfg, ddp_config=ddp_config, module=model, full_param_layout=full_param_layout
     )
 
     # Should have exactly one dense buffer and one expert buffer.

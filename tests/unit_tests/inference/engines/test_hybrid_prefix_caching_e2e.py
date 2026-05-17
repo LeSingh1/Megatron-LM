@@ -131,6 +131,7 @@ class TestMambaPrefixCachingE2E:
             add_bias_linear=True,
             is_hybrid_model=True,
         )
+        transformer_config.finalize()
         model = HybridModel(
             config=transformer_config,
             hybrid_stack_spec=hybrid_stack_spec,

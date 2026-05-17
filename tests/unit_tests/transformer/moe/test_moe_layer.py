@@ -45,6 +45,7 @@ class TestMoELayerInit:
             moe_ffn_hidden_size=128,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_with_transformer_engine_submodules(
                 num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm
@@ -74,6 +75,7 @@ class TestMoELayerInit:
             moe_grouped_gemm=grouped_gemm,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_local_submodules(
                 num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm
@@ -112,6 +114,7 @@ class TestMoELayerInit:
             bf16=True,
             params_dtype=torch.bfloat16,
         )
+        transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_with_transformer_engine_submodules(
                 num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm
@@ -157,6 +160,7 @@ class TestInterleaveTransformerBlock:
             num_moe_experts=2,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
         self.parallel_transformer_block = TransformerBlock(
             self.transformer_config, get_gpt_decoder_block_spec(self.transformer_config, False)
         )
@@ -238,6 +242,7 @@ class TestMoELayerFP16:
             fp16=True,
             params_dtype=torch.float16,
         )
+        transformer_config.finalize()
 
         submodules = get_submodules(
             get_gpt_layer_local_submodules(num_experts=num_moe_experts, moe_grouped_gemm=False).mlp
@@ -340,6 +345,7 @@ class TestMoELayerRecompute:
             bf16=True,
             params_dtype=torch.bfloat16,
         )
+        transformer_config.finalize()
 
         # Use TE spec for fp8, local spec otherwise
         if fp8:

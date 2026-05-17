@@ -20,6 +20,7 @@ class TestRADIOViTModel:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_layer_with_transformer_engine_spec()
         self.model = RADIOViTModel(
             transformer_config,
@@ -228,6 +229,7 @@ class TestRADIOTrainOverride:
         self.transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        self.transformer_config.finalize()
         self.layer_spec = get_gpt_layer_with_transformer_engine_spec()
 
     def teardown_method(self, method):
@@ -322,6 +324,7 @@ class TestRADIODynamicResAndTemporal:
         self.transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        self.transformer_config.finalize()
         self.layer_spec = get_gpt_layer_with_transformer_engine_spec()
 
     def teardown_method(self, method):

@@ -53,6 +53,7 @@ class TestVLMTextGenerationController:
             use_cpu_initialization=False,
             bf16=True,
         )
+        language_config.finalize()
         vision_config = TransformerConfig(
             num_layers=2,
             hidden_size=16,
@@ -60,6 +61,7 @@ class TestVLMTextGenerationController:
             use_cpu_initialization=False,
             bf16=True,
         )
+        vision_config.finalize()
         vision_projection_config = TransformerConfig(
             num_layers=2,
             hidden_size=self.language_hidden_size,
@@ -68,6 +70,7 @@ class TestVLMTextGenerationController:
             use_cpu_initialization=False,
             bf16=True,
         )
+        vision_projection_config.finalize()
 
         language_layer_submodules = get_gpt_layer_local_submodules()
         vision_layer_spec = ModuleSpec(

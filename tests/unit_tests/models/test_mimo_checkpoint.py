@@ -85,6 +85,7 @@ def _create_model_and_optimizer(encoder_grid, llm_grid, hidden_size, num_layers,
         bf16=True,
         use_distributed_optimizer=False,
     )
+    opt_config.finalize()
     optimizer = get_mimo_optimizer(mimo_model, opt_config)
 
     # Fake backward + step to populate optimizer state (Adam m/v)

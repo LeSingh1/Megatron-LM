@@ -49,6 +49,7 @@ def _test_fused_apply_mla_rope_for_q(input_format):
         rotary_interleaved=False,
         multi_latent_attention=True,
     )
+    transformer_config.finalize()
 
     if input_format == "sbhd":
         cu_seqlens = None
@@ -129,6 +130,7 @@ def _test_fused_apply_mla_rope_for_kv(input_format):
         rotary_interleaved=False,
         multi_latent_attention=True,
     )
+    transformer_config.finalize()
 
     if input_format == "sbhd":
         cu_seqlens = None

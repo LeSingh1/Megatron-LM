@@ -50,6 +50,7 @@ def initialize_t5_model(seed, encoder_decoder_spec_fn, num_layers=8, **config_kw
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs)
+    transformer_config.finalize()
 
     en_block_spec = TransformerBlockSubmodules([encoder_spec_fn()] * encoder_layers_per_pipeline)
     de_block_spec = TransformerBlockSubmodules([decoder_spec_fn()] * decoder_layers_per_pipeline)

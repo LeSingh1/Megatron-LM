@@ -21,6 +21,7 @@ def test_allreduce_conditional_embedding_grads():
     config = ModelParallelConfig(
         pipeline_model_parallel_size=4, sequence_parallel=False, pipeline_dtype=torch.float
     )
+    config.finalize()
     config.has_cond_embedder = True
 
     pp_rank = parallel_state.get_pipeline_model_parallel_rank()

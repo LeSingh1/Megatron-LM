@@ -43,6 +43,7 @@ class TestT5Model:
             tensor_model_parallel_size=tp,
             pipeline_model_parallel_size=pp,
         )
+        transformer_config.finalize()
         rank = ps.get_pipeline_model_parallel_rank()
         world_size = ps.get_pipeline_model_parallel_world_size()
         en_block_spec = get_t5_encoder_with_transformer_engine_block_spec(12)

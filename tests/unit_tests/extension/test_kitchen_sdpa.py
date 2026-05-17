@@ -381,6 +381,7 @@ def test_attention_implementations(
             }
         ),
     )
+    config.finalize()
 
     CompareImplementations().compare_implementations(
         impl1=impl1,
@@ -466,6 +467,7 @@ def test_kitchen_flash_attention_implementations(
             }
         ),
     )
+    config.finalize()
 
     CompareImplementations().compare_implementations(
         impl1=impl1,

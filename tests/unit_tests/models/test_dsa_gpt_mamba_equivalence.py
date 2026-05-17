@@ -97,7 +97,7 @@ _MOE_MAMBA_PATTERN = "D-D-DEDE"  # 2 dense (D-) + 2 MoE (DE)
 
 def _make_dsa_config(num_layers: int, tp: int = 1, pp: int = 1) -> MLATransformerConfig:
     """Return a small DeepSeek-V3.2 proxy MLATransformerConfig."""
-    return MLATransformerConfig(
+    config = MLATransformerConfig(
         num_layers=num_layers,
         hidden_size=256,
         num_attention_heads=16,
@@ -122,6 +122,8 @@ def _make_dsa_config(num_layers: int, tp: int = 1, pp: int = 1) -> MLATransforme
         tensor_model_parallel_size=tp,
         pipeline_model_parallel_size=pp,
     )
+    config.finalize()
+    return config
 
 
 def _make_dsa_moe_config(num_layers: int, tp: int = 1, pp: int = 1) -> MLATransformerConfig:
@@ -130,7 +132,7 @@ def _make_dsa_moe_config(num_layers: int, tp: int = 1, pp: int = 1) -> MLATransf
     Mirrors the DeepSeek-V3 pattern: first 2 GPT layers are dense, last 2 are MoE.
     ``moe_layer_freq=[0, 0, 1, 1]`` controls which GPT layers become MoE layers.
     """
-    return MLATransformerConfig(
+    config = MLATransformerConfig(
         num_layers=num_layers,
         hidden_size=256,
         num_attention_heads=16,
@@ -168,6 +170,8 @@ def _make_dsa_moe_config(num_layers: int, tp: int = 1, pp: int = 1) -> MLATransf
         moe_shared_expert_intermediate_size=512,
         moe_layer_freq=[0, 0, 1, 1],  # first 2 layers dense, last 2 MoE
     )
+    config.finalize()
+    return config
 
 
 def _build_gpt_model(

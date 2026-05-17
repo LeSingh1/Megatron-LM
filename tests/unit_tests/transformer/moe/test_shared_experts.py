@@ -32,6 +32,7 @@ class TestSharedExperts:
             moe_router_topk=4,
             add_bias_linear=False,
         )
+        self.config.finalize()
 
     def get_moe_layer(self, **kargs) -> MoELayer:
         submodules = get_submodules(

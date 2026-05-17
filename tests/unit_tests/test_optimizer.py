@@ -76,7 +76,9 @@ class Net(nn.Module):
 def test_get_param_groups_no_overrides(mock_get_world_size):
     net = Net()
     # NOTE: to get no overrides, supply an empty dictionary rather than None.
-    param_groups = _get_param_groups([net], OptimizerConfig(optimizer='adam', lr=0.01), {})
+    _opt_cfg = OptimizerConfig(optimizer='adam', lr=0.01)
+    _opt_cfg.finalize()
+    param_groups = _get_param_groups([net], _opt_cfg, {})
     assert len(param_groups) == 1
     pg0 = param_groups[0]
     assert pg0.keys() == {
@@ -107,6 +109,7 @@ def test_get_param_groups_default_overrides(mock_get_world_size):
     """Test that the default overrides are applied to the parameter groups."""
     net = Net()
     opt_config = OptimizerConfig(optimizer='adam', lr=0.01)
+    opt_config.finalize()
     config_overrides = get_standard_config_overrides(opt_config)
     check_config_overrides_consistency(opt_config, config_overrides)
     param_groups = _get_param_groups([net], opt_config, config_overrides)
@@ -129,6 +132,7 @@ def test_get_param_groups_with_overrides(mock_get_world_size):
         ): ParamGroupOverride(wd_mult=0.0)
     }
     opt_config = OptimizerConfig(optimizer='adam', lr=0.01)
+    opt_config.finalize()
     check_config_overrides_consistency(opt_config, config_overrides)
     param_groups = _get_param_groups([net], opt_config, config_overrides)
     assert len(param_groups) == 2
@@ -148,9 +152,11 @@ def test_get_param_groups_with_overrides(mock_get_world_size):
 def test_get_param_groups_multiple_matches(mock_get_world_size):
     net = Net()
 
+    _opt_cfg_inline = OptimizerConfig(optimizer='adam', lr=0.01)
+    _opt_cfg_inline.finalize()
     param_groups = _get_param_groups(
         [net],
-        OptimizerConfig(optimizer='adam', lr=0.01),
+        _opt_cfg_inline,
         {
             ParamKey(name="*.bias"): ParamGroupOverride(min_lr=1e-4, wd_mult=0.0),
             ParamKey(
@@ -165,6 +171,7 @@ def test_get_param_groups_multiple_matches(mock_get_world_size):
         ): ParamGroupOverride(min_lr=1e-4, wd_mult=0.0)
     }
     opt_config = OptimizerConfig(optimizer='adam', lr=0.01)
+    opt_config.finalize()
     check_config_overrides_consistency(opt_config, config_overrides)
     param_groups2 = _get_param_groups([net], opt_config, config_overrides)
     assert len(param_groups) == 2
@@ -186,6 +193,7 @@ def test_get_param_groups_overlapping_matches(mock_get_world_size):
         ParamKey(name="*conv1*"): ParamGroupOverride(min_lr=10, max_lr=20),
     }
     opt_config = OptimizerConfig(optimizer='adam', lr=0.01)
+    opt_config.finalize()
     check_config_overrides_consistency(opt_config, config_overrides)
     param_groups = _get_param_groups([net], opt_config, config_overrides)
     assert len(param_groups) == 3
@@ -222,6 +230,7 @@ def test_get_param_groups_with_standard_config_overrides(apply_wd_to_qk_layernor
     net = Net()
 
     config = OptimizerConfig(optimizer='adam', lr=0.01)
+    config.finalize()
     config_overrides = get_standard_config_overrides(config=config)
     param_groups = _get_param_groups([net], config, config_overrides)
 
@@ -260,6 +269,7 @@ def test_get_param_groups_appling_wd_to_qk_layernorm(apply_wd_to_qk_layernorm: b
     config = OptimizerConfig(
         optimizer='adam', lr=0.01, apply_wd_to_qk_layernorm=apply_wd_to_qk_layernorm
     )
+    config.finalize()
     config_overrides = get_standard_config_overrides(config=config)
     param_groups = _get_param_groups([net], config, config_overrides)
 
@@ -455,9 +465,10 @@ def test_precision_aware_optimizer(
     baseline_model.requires_grad_(True)
     baseline_model.weight.data.fill_(1.0)
     baseline_ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=True)
-    baseline_model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), baseline_ddp_config, baseline_model
-    )
+    baseline_ddp_config.finalize()
+    _baseline_tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _baseline_tcfg.finalize()
+    baseline_model = DistributedDataParallel(_baseline_tcfg, baseline_ddp_config, baseline_model)
     baseline_optimizer_config = OptimizerConfig(
         optimizer='adam',
         lr=0.01,
@@ -469,6 +480,7 @@ def test_precision_aware_optimizer(
         exp_avg_dtype=torch.float32,
         exp_avg_sq_dtype=torch.float32,
     )
+    baseline_optimizer_config.finalize()
     baseline_optim = get_megatron_optimizer(baseline_optimizer_config, [baseline_model])
 
     # Create test model with specified dtypes for optimizer states
@@ -476,9 +488,10 @@ def test_precision_aware_optimizer(
     test_model.requires_grad_(True)
     test_model.weight.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=True)
-    test_model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, test_model
-    )
+    ddp_config.finalize()
+    _test_tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _test_tcfg.finalize()
+    test_model = DistributedDataParallel(_test_tcfg, ddp_config, test_model)
     test_optimizer_config = OptimizerConfig(
         optimizer='adam',
         lr=0.01,
@@ -491,6 +504,7 @@ def test_precision_aware_optimizer(
         exp_avg_dtype=moment_dtype,
         exp_avg_sq_dtype=moment_dtype,
     )
+    test_optimizer_config.finalize()
     test_optim = get_megatron_optimizer(test_optimizer_config, [test_model])
 
     # Use same input for both models
@@ -570,9 +584,10 @@ def test_distrib_optimizer_save_load_with_non_tensor_state(use_precision_aware):
     model.requires_grad_(True)
     model.weight.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=True)
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-    )
+    ddp_config.finalize()
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config, model)
 
     optimizer_config = OptimizerConfig(
         optimizer='adam',
@@ -585,6 +600,7 @@ def test_distrib_optimizer_save_load_with_non_tensor_state(use_precision_aware):
         exp_avg_dtype=torch.float32,
         exp_avg_sq_dtype=torch.float32,
     )
+    optimizer_config.finalize()
     optim = get_megatron_optimizer(optimizer_config, [model])
 
     # Run a training step to populate optimizer state
@@ -672,9 +688,10 @@ def test_optim_sharded_state_dict(use_distributed_optimizer: bool, precision: st
     model.requires_grad_(True)
     model.weight.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=use_distributed_optimizer)
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-    )
+    ddp_config.finalize()
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config, model)
     for param in model.parameters():
         assert param.requires_grad
 
@@ -689,6 +706,7 @@ def test_optim_sharded_state_dict(use_distributed_optimizer: bool, precision: st
             fp16=False,
             use_distributed_optimizer=use_distributed_optimizer,
         )
+    optimizer_config.finalize()
     optim = get_megatron_optimizer(optimizer_config, [model])
 
     model_sharded_state_dict = model.sharded_state_dict()
@@ -718,10 +736,12 @@ def test_optimizer_reload_model_params():
     for param in model.parameters():
         param.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=True)
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-    )
+    ddp_config.finalize()
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config, model)
     optimizer_config = OptimizerConfig(optimizer='adam', bf16=True, use_distributed_optimizer=True)
+    optimizer_config.finalize()
     optim = get_megatron_optimizer(optimizer_config, [model])
 
     # Set all model params to 2.
@@ -840,9 +860,10 @@ def test_get_megatron_optimizer_with_custom_process_groups(world_size, tp_size, 
     model.requires_grad_(True)
     model.weight.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=True)
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-    )
+    ddp_config.finalize()
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config, model)
     for param in model.parameters():
         assert param.requires_grad
     model_chunks = [model]
@@ -856,6 +877,7 @@ def test_get_megatron_optimizer_with_custom_process_groups(world_size, tp_size, 
         adam_beta2=0.999,
         adam_eps=1e-8,
     )
+    optimizer_config.finalize()
 
     # Test 1: Create optimizer with custom process groups
     optimizer = get_megatron_optimizer(
@@ -922,13 +944,15 @@ def test_get_megatron_optimizer_custom_process_groups_validation():
     model.requires_grad_(True)
     model.weight.data.fill_(1.0)
     ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=True)
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-    )
+    ddp_config.finalize()
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config, model)
     for param in model.parameters():
         assert param.requires_grad
     model_chunks = [model]
     optimizer_config = OptimizerConfig(optimizer='adam', lr=0.001)
+    optimizer_config.finalize()
 
     # Test 2: Missing dp process group in pg_collection
     pg_collection_no_dp = ProcessGroupCollection()

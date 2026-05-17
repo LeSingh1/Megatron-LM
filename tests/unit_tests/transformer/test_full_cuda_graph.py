@@ -55,6 +55,7 @@ def test_forward_backward_func_with_full_cuda_graph(mocker):
     forward_backward_func = FullCudaGraphWrapper(forward_backward_func)
     mocker.patch("megatron.core.pipeline_parallel.schedules.custom_backward", return_value=2)
     config = ModelParallelConfig(pipeline_model_parallel_size=1)
+    config.finalize()
     model.config = config
 
     num_microbatches = 4

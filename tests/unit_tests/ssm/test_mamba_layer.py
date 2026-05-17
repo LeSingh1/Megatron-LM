@@ -26,6 +26,7 @@ class TestMambaLayer:
             num_attention_heads=1,
             use_cpu_initialization=True,
         )
+        transformer_config.finalize()
         assert isinstance(hybrid_stack_spec.submodules, HybridStackSubmodules)
         assert isinstance(hybrid_stack_spec.submodules.mamba_layer.submodules, MambaLayerSubmodules)
         pg_collection = ProcessGroupCollection.use_mpu_process_groups(required_pgs=['tp', 'cp'])

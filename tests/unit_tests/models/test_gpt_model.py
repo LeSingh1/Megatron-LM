@@ -47,6 +47,7 @@ class TestGPTModel:
             use_cpu_initialization=True,
             embedding_init_method_std=1.0,  # Test that we can initialize the embedding weights to something else.
         )
+        transformer_config.finalize()
         self.gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),
@@ -283,6 +284,7 @@ class TestGPTWithFusedOps:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         self.gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(use_te_op_fuser=True),
@@ -343,6 +345,7 @@ def test_gpt_with_te_activation_func(num_experts, gated_linear_unit):
         num_moe_experts=num_experts,
         moe_grouped_gemm=(num_experts is not None),
     )
+    transformer_config.finalize()
     gpt_model = GPTModel(
         config=transformer_config,
         transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(
@@ -416,6 +419,7 @@ class TestGPTModelWithCustomPG:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=1024, num_attention_heads=16, use_cpu_initialization=False
         )
+        transformer_config.finalize()
         self.gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),
@@ -482,6 +486,7 @@ class TestGPTWithDynamicInference:
             fp8="hybrid",
             fp8_recipe="tensorwise",
         )
+        transformer_config.finalize()
 
         self.gpt_model = GPTModel(
             config=transformer_config,
@@ -508,13 +513,15 @@ class TestGPTWithDynamicInference:
         self.gpt_model.eval()
         config = self.gpt_model.config
 
+        _inference_model_config = TransformerConfig(
+            params_dtype=config.params_dtype,
+            num_layers=config.num_layers,
+            kv_channels=config.hidden_size // config.num_attention_heads,
+            num_attention_heads=config.num_attention_heads,
+        )
+        _inference_model_config.finalize()
         inference_context = DynamicInferenceContext(
-            model_config=TransformerConfig(
-                params_dtype=config.params_dtype,
-                num_layers=config.num_layers,
-                kv_channels=config.hidden_size // config.num_attention_heads,
-                num_attention_heads=config.num_attention_heads,
-            ),
+            model_config=_inference_model_config,
             inference_config=InferenceConfig(
                 max_sequence_length=self.gpt_model.module.max_sequence_length,
                 buffer_size_gb=1.0,

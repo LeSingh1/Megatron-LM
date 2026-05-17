@@ -92,6 +92,7 @@ def _build_flash_attn_bik_model(seq_len: int, vocab_size: int, hidden_size: int 
         fp32_residual_connection=False,
         nccl_all_reduce_for_prefill=False,
     )
+    cfg.finalize()
     cfg.fp16 = False
     cfg.bf16 = True
     model = GPTModel(

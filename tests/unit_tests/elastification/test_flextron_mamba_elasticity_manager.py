@@ -62,6 +62,7 @@ class TestFlextronMambaElasticityManager:
             use_cpu_initialization=True,
             use_mamba_mem_eff_path=True,
         )
+        config.finalize()
         # Inject the flextron fields directly (bypassing inject_flextron_config
         # to avoid pulling in the whole args-parser stack).
         for k, v in _flextron_fields(hidden_size, num_heads).items():
@@ -188,6 +189,7 @@ class TestAddFlextronMambaElasticity:
             use_cpu_initialization=True,
             use_mamba_mem_eff_path=True,
         )
+        config.finalize()
         for k, v in _flextron_fields(256, 8).items():
             setattr(config, k, v)
 

@@ -74,6 +74,7 @@ class PrefixCachingTestBase:
             pipeline_model_parallel_size=1,
             use_cpu_initialization=True,
         )
+        transformer_config.finalize()
         inference_config = InferenceConfig(
             max_sequence_length=max_sequence_length,
             buffer_size_gb=buffer_size_gb,

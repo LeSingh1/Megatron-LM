@@ -32,6 +32,7 @@ class TestMegatronModule:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         self.megatron_module = DummyModule(config=transformer_config).cuda()
 
     def teardown_method(self, method):
@@ -61,6 +62,7 @@ class TestFloat16Module:
         self.transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        self.transformer_config.finalize()
         self.megatron_module = DummyModule(config=self.transformer_config).cuda()
 
     def teardown_method(self, method):

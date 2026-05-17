@@ -68,6 +68,7 @@ class TestLionOptimizerConfig:
             lion_beta2=0.97,
             muon_scalar_optimizer="lion",
         )
+        config.finalize()
         assert config.lion_beta1 == 0.92
         assert config.lion_beta2 == 0.97
         assert config.muon_scalar_optimizer == "lion"
@@ -75,6 +76,7 @@ class TestLionOptimizerConfig:
     def test_lion_config_defaults(self):
         """Config defaults should match expected Lion defaults."""
         config = OptimizerConfig()
+        config.finalize()
         assert config.lion_beta1 == 0.95
         assert config.lion_beta2 == 0.98
         assert config.muon_scalar_optimizer == "adam"
@@ -88,6 +90,7 @@ class TestLionOptimizerConfig:
         """_get_param_groups should work with lion config (same as adam)."""
         model = SimpleModel()
         config = OptimizerConfig(optimizer="lion", lr=1e-4)
+        config.finalize()
         param_groups = _get_param_groups([model], config, {})
 
         assert len(param_groups) == 1
@@ -103,6 +106,7 @@ class TestLionOptimizerConfig:
 
             model = SimpleModel()
             config = OptimizerConfig(optimizer="lion", lr=1e-4)
+            config.finalize()
 
             with pytest.raises(ImportError, match="emerging_optimizers"):
                 _create_lion_optimizer(model, config)
@@ -125,6 +129,7 @@ class TestLionOptimizerExactness:
         config = OptimizerConfig(
             optimizer="lion", lr=3e-4, lion_beta1=0.93, lion_beta2=0.99, weight_decay=0.01
         )
+        config.finalize()
 
         optimizer = _create_lion_optimizer(model, config)
 
@@ -145,6 +150,7 @@ class TestLionOptimizerExactness:
         """init_state_fn should pre-initialize exp_avg state for all params."""
         model = SimpleModel()
         config = OptimizerConfig(optimizer="lion", lr=1e-4)
+        config.finalize()
 
         optimizer = _create_lion_optimizer(model, config)
         inner_opt = optimizer.optimizer
@@ -200,6 +206,7 @@ class TestLionOptimizerExactness:
         config = OptimizerConfig(
             optimizer="lion", lr=lr, lion_beta1=beta1, lion_beta2=beta2, weight_decay=weight_decay
         )
+        config.finalize()
         megatron_optimizer = _create_lion_optimizer(model_megatron, config)
         opt_megatron = megatron_optimizer.optimizer
 

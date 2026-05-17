@@ -219,6 +219,7 @@ def get_test_config(num_layers=1, num_moe_experts=8, extra_kwargs={}, moe_groupe
         moe_router_dtype="fp32",
         **extra_kwargs,
     )
+    config.finalize()
     return config
 
 

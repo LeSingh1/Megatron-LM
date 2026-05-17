@@ -44,6 +44,7 @@ def _model_provider():
         fp8_amax_compute_algo="max",
         tensor_model_parallel_size=2,
     )
+    transformer_config.finalize()
 
     gpt_model = GPTModel(
         config=transformer_config,

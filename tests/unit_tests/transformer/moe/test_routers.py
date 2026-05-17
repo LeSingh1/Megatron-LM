@@ -45,6 +45,7 @@ class TestTop2Router:
             params_dtype=torch.bfloat16,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_local_submodules(num_experts=num_moe_experts, moe_grouped_gemm=False).mlp
         )
@@ -313,6 +314,7 @@ class TestGroupLimitedRouter:
             params_dtype=torch.bfloat16,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
 
         # init MoE layer
         submodules = get_submodules(
@@ -421,6 +423,7 @@ class TestAuxLossFreeTop2Router:
             params_dtype=torch.bfloat16,
             add_bias_linear=False,
         )
+        self.transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_local_submodules(num_experts=num_moe_experts, moe_grouped_gemm=False).mlp
         )

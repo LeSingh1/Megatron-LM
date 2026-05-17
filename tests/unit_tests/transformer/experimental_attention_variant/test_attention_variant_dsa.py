@@ -611,6 +611,7 @@ class TestDSAIndexer:
             dsa_indexer_head_dim=64,
             dsa_indexer_topk=cls.index_topk,
         )
+        cls.config.finalize()
 
         # Create indexer submodules spec
         from megatron.core.extensions.transformer_engine import TELinear, TENorm
@@ -749,6 +750,7 @@ class TestDSAttention:
             dsa_indexer_loss_coeff=1.0,
             dsa_indexer_use_sparse_loss=False,
         )
+        cls.config.finalize()
 
         # Create sparse attention submodules spec
         from megatron.core.extensions.transformer_engine import TELinear, TENorm
@@ -955,7 +957,7 @@ class TestIndexerTensorParallel:
         # Get TP size from parallel_state
         tensor_model_parallel_size = parallel_state.get_tensor_model_parallel_world_size()
 
-        return MLATransformerConfig(
+        cfg = MLATransformerConfig(
             num_layers=2,
             hidden_size=256,
             num_attention_heads=16,
@@ -978,6 +980,8 @@ class TestIndexerTensorParallel:
             dsa_indexer_head_dim=64,
             dsa_indexer_topk=32,
         )
+        cfg.finalize()
+        return cfg
 
     def _create_indexer(self, config, pg_collection):
         """Helper to create indexer."""
@@ -1192,7 +1196,7 @@ class TestDSAttentionTensorParallel:
         # Get TP size from parallel_state
         tensor_model_parallel_size = parallel_state.get_tensor_model_parallel_world_size()
 
-        return MLATransformerConfig(
+        cfg = MLATransformerConfig(
             num_layers=2,
             hidden_size=256,
             num_attention_heads=16,
@@ -1217,6 +1221,8 @@ class TestDSAttentionTensorParallel:
             dsa_indexer_loss_coeff=1.0,
             dsa_indexer_use_sparse_loss=use_sparse_indexer_loss,
         )
+        cfg.finalize()
+        return cfg
 
     def _create_sparse_attention(self, config, pg_collection):
         """Helper to create sparse attention."""
@@ -1620,7 +1626,7 @@ class TestDSAModuleSpecDispatch:
         Utils.destroy_model_parallel()
 
     def _make_dsa_config(self, **kwargs):
-        return MLATransformerConfig(
+        cfg = MLATransformerConfig(
             num_layers=2,
             hidden_size=256,
             num_attention_heads=16,
@@ -1640,6 +1646,8 @@ class TestDSAModuleSpecDispatch:
             dsa_indexer_topk=32,
             **kwargs,
         )
+        cfg.finalize()
+        return cfg
 
     def test_get_experimental_attention_variant_module_spec_dsa(self):
         """get_experimental_attention_variant_module_spec dispatches to DSA for variant='dsa'."""
@@ -1665,6 +1673,7 @@ class TestDSAModuleSpecDispatch:
         from megatron.core.transformer import TransformerConfig as _TransformerConfig
 
         config = _TransformerConfig(num_layers=2, hidden_size=256, num_attention_heads=4)
+        config.finalize()
         with pytest.raises(AssertionError, match="only MLA supports sparse attention"):
             get_dsa_module_spec_for_backend(config, backend=None)
 

@@ -94,6 +94,7 @@ class MoEModelTestContainer:
             moe_permute_fusion=kwargs.get("moe_permute_fusion", False),
             moe_flex_dispatcher_backend=kwargs.get("moe_flex_dispatcher_backend", None),
         )
+        self.config.finalize()
 
         # init moe layer
         self.moe_layer = self.new_moe_layer()

@@ -987,6 +987,7 @@ class TestColocatedGradientScalingCorrectness:
         ddp_config = DistributedDataParallelConfig(
             overlap_grad_reduce=True, bucket_size=10000, use_distributed_optimizer=True
         )
+        ddp_config.finalize()
 
         # Build dist first (heterogeneous TP/DP).
         torch.manual_seed(12345)
@@ -1058,6 +1059,7 @@ class TestColocatedGradientScalingCorrectness:
             bf16=False,
             use_distributed_optimizer=True,
         )
+        opt_config.finalize()
         dist_optimizer = get_mimo_optimizer(dist_mimo, opt_config)
         ref_optimizer = get_mimo_optimizer(ref_mimo, opt_config)
 

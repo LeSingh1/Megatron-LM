@@ -54,6 +54,7 @@ def _create_transformer_block(
         bf16=dtype == torch.bfloat16,
         context_parallel_size=cp_size,
     )
+    transformer_config.finalize()
 
     block = (
         TransformerBlock(

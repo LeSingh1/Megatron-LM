@@ -60,6 +60,7 @@ class TestParallelAttention:
             params_dtype=torch.bfloat16,
             attention_output_gate=output_gate,
         )
+        self.transformer_config.finalize()
         self.parallel_attention = SelfAttention(
             self.transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -203,6 +204,7 @@ class TestClipQK:
             use_cpu_initialization=True,
             qk_clip=False,
         )
+        transformer_config.finalize()
         attention = SelfAttention(
             transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -223,6 +225,7 @@ class TestClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        transformer_config.finalize()
         attention = SelfAttention(
             transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -243,6 +246,7 @@ class TestClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        transformer_config.finalize()
         attention = SelfAttention(
             transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -277,6 +281,7 @@ class TestClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        transformer_config.finalize()
         attention = SelfAttention(
             transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -312,6 +317,7 @@ class TestClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        transformer_config.finalize()
         attention = SelfAttention(
             transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -346,6 +352,7 @@ class TestClipQK:
             qk_clip_threshold=100.0,
             qk_clip_alpha=0.5,
         )
+        transformer_config.finalize()
         attention = SelfAttention(
             transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -391,6 +398,7 @@ class TestSelfAttention:
             tensor_model_parallel_size=tensor_model_parallel_size,
             use_cpu_initialization=False,
         )
+        self.transformer_config.finalize()
         self.self_attention = SelfAttention(
             self.transformer_config,
             get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules,
@@ -685,6 +693,7 @@ def test_parallel_attention_correctness(
         hidden_dropout=0.0,
         attention_dropout=0.0,
     )
+    transformer_config.finalize()
 
     transformer_layer_spec = get_gpt_layer_with_transformer_engine_spec(qk_layernorm=qk_layernorm)
     atol, rtol = 1e-2, 1e-2
@@ -720,6 +729,7 @@ def test_parallel_attention_correctness_num_query_groups_less_than_tp_size(
         hidden_dropout=0.0,
         attention_dropout=0.0,
     )
+    transformer_config.finalize()
 
     transformer_layer_spec = get_gpt_layer_with_transformer_engine_spec()
     atol, rtol = 1e-2, 1e-2
@@ -752,6 +762,7 @@ def test_qk_layernorm_from_config_fallback():
             use_cpu_initialization=True,
             qk_layernorm=True,
         )
+        config.finalize()
         base = get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules
         submodules = replace(base, q_layernorm=None, k_layernorm=None)
         attn = SelfAttention(config, submodules, layer_number=1)
@@ -778,6 +789,7 @@ def test_qk_l2_norm_from_config_fallback():
             use_cpu_initialization=True,
             qk_l2_norm=True,
         )
+        config.finalize()
         base = get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules
         submodules = replace(base, q_layernorm=None, k_layernorm=None)
         attn = SelfAttention(config, submodules, layer_number=1)
@@ -800,6 +812,7 @@ def test_qk_layernorm_spec_config_mismatch_raises():
         config = TransformerConfig(
             num_layers=1, hidden_size=128, num_attention_heads=4, use_cpu_initialization=True
         )
+        config.finalize()
         base = get_gpt_layer_with_transformer_engine_submodules().self_attention.submodules
         submodules = replace(base, q_layernorm=L2Norm, k_layernorm=L2Norm)
         with pytest.raises(ValueError, match="qk_layernorm"):

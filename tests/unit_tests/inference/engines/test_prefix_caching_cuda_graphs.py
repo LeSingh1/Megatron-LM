@@ -95,6 +95,7 @@ class TestPrefixCachingCudaGraphs:
                 pipeline_dtype=torch.bfloat16,
                 add_bias_linear=True,
             )
+            config.finalize()
             model = GPTModel(
                 config=config,
                 transformer_layer_spec=get_gpt_layer_local_spec(),
@@ -121,6 +122,7 @@ class TestPrefixCachingCudaGraphs:
                 add_bias_linear=True,
                 is_hybrid_model=True,
             )
+            config.finalize()
             model = HybridModel(
                 config=config,
                 hybrid_stack_spec=hybrid_stack_spec,
@@ -343,6 +345,7 @@ class TestHybridChunkedPrefillIntermediateState:
             add_bias_linear=True,
             is_hybrid_model=True,
         )
+        config.finalize()
         model = HybridModel(
             config=config,
             hybrid_stack_spec=hybrid_stack_spec,

@@ -49,6 +49,7 @@ def get_vision_submodules_spec(hidden_size, img_h, img_w, patch_dim):
     vision_config = TransformerConfig(
         num_layers=1, hidden_size=hidden_size, num_attention_heads=4, use_cpu_initialization=True
     )
+    vision_config.finalize()
     vision_encoder_spec = ModuleSpec(
         module=CLIPViTModel,
         params={
@@ -100,6 +101,7 @@ def get_language_model_spec(hidden_size, vocab_size, seq_len):
     lm_config = TransformerConfig(
         num_layers=2, hidden_size=hidden_size, num_attention_heads=4, use_cpu_initialization=True
     )
+    lm_config.finalize()
     language_layer_spec = get_gpt_layer_with_transformer_engine_spec()
     return ModuleSpec(
         module=GPTModel,
@@ -317,6 +319,7 @@ class TestMimoModel:
             pipeline_model_parallel_size=2,
             pipeline_dtype=torch.float32,
         )
+        lm_config_pp2.finalize()
         language_model_spec_pp2 = ModuleSpec(
             module=GPTModel,
             params={

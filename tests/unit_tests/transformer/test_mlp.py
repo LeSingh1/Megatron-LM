@@ -20,6 +20,7 @@ class TestParallelMLP:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         mlp_submodules = get_submodules(get_gpt_layer_local_submodules().mlp)
         assert isinstance(mlp_submodules, MLPSubmodules)
         self.mlp = MLP(transformer_config, mlp_submodules)

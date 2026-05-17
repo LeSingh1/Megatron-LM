@@ -47,6 +47,7 @@ class TestMoELayerDispatcherDiscrepancy:
             expert_model_parallel_size=ep_size,
             sequence_parallel=True if (tp_size > 1) else False,
         )
+        self.transformer_config.finalize()
         submodules = get_gpt_layer_with_transformer_engine_submodules(
             num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm
         )
@@ -124,6 +125,7 @@ class TestMoELayerDispatcherDiscrepancy:
             sequence_parallel=True if (tp_size > 1 and ep_size > 1) else False,
             bf16=True,
         )
+        self.transformer_config.finalize()
         submodules = get_gpt_layer_with_transformer_engine_submodules(
             num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm
         )
@@ -191,6 +193,7 @@ class TestMoELayerDispatcherDiscrepancy:
             sequence_parallel=True if (tp_size > 1 and ep_size > 1) else False,
             bf16=True,
         )
+        self.transformer_config.finalize()
         submodules = get_gpt_layer_with_transformer_engine_submodules(
             num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm
         )

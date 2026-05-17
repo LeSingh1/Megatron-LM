@@ -55,10 +55,13 @@ def test_fsdp2_constructor(init_model_parallel):
 
     # Create a dummy model and configs.
     config = TransformerConfig(num_layers=1, kv_channels=1, bf16=True)
+    config.finalize()
     ddp_config = DistributedDataParallelConfig()
+    ddp_config.finalize()
     model = DummyModel(config)
     model = Float16Module(config, model)
     ddp_config = DistributedDataParallelConfig()
+    ddp_config.finalize()
 
     # Create the sharded model.
     fsdp_model = TorchFullyShardedDataParallel(config, ddp_config, model)
@@ -83,7 +86,9 @@ def test_fsdp2_constructor_with_process_group(init_model_parallel):
 
     # Create a dummy model and configs.
     config = TransformerConfig(num_layers=1, kv_channels=1, bf16=True)
+    config.finalize()
     ddp_config = DistributedDataParallelConfig()
+    ddp_config.finalize()
     model = DummyModel(config)
     model = Float16Module(config, model)
 

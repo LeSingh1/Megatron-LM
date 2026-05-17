@@ -15,6 +15,7 @@ class TestBaseEmbedding:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         self.base_embedding = LanguageModelEmbedding(
             config=transformer_config,
             vocab_size=100,

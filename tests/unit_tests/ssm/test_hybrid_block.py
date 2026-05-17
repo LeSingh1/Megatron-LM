@@ -41,6 +41,7 @@ class TestHybridBlock:
             use_cpu_initialization=True,
             **config_kwargs,
         )
+        transformer_config.finalize()
         modules = hybrid_stack_spec.submodules
         return HybridStack(
             transformer_config,
@@ -73,6 +74,7 @@ class TestHybridBlock:
             dsa_indexer_head_dim=64,
             dsa_indexer_topk=32,
         )
+        transformer_config.finalize()
         modules = hybrid_stack_spec.submodules
         return HybridStack(
             transformer_config,
@@ -242,6 +244,7 @@ class TestHybridBlock:
             use_cpu_initialization=True,
             activation_func=torch.nn.functional.silu,
         )
+        transformer_config.finalize()
         modules = hybrid_stack_spec.submodules
         block = HybridStack(
             transformer_config,

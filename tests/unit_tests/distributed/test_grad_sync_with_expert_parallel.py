@@ -43,6 +43,7 @@ class TestMoEModel(torch.nn.Module):
             params_dtype=torch.bfloat16,
             add_bias_linear=False,
         )
+        transformer_config.finalize()
         submodules = get_submodules(
             get_gpt_layer_with_transformer_engine_submodules(
                 num_experts=num_moe_experts, moe_grouped_gemm=moe_grouped_gemm
@@ -76,6 +77,7 @@ def get_moe_model_and_buffers(
         average_in_collective=average_in_collective,
         num_distributed_optimizer_instances=num_distributed_optimizer_instances,
     )
+    ddp_config.finalize()
     model = TestMoEModel(
         hidden_size=hidden_size,
         num_layers=num_layers,
@@ -84,9 +86,9 @@ def get_moe_model_and_buffers(
         ep_size=ep_size,
         etp_size=etp_size,
     )
-    model = DistributedDataParallel(
-        TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config=ddp_config, module=model
-    )
+    _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+    _tcfg.finalize()
+    model = DistributedDataParallel(_tcfg, ddp_config=ddp_config, module=model)
     assert len(model.buffers) == 1
     param_and_grad_buffer = model.buffers[0]
     ep_param_and_grad_buffer = (

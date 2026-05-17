@@ -39,6 +39,7 @@ def initialize_bert_model(
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs)
+    transformer_config.finalize()
     pre_process = ps.is_pipeline_first_stage()
     post_process = ps.is_pipeline_last_stage()
     model = BertModel(

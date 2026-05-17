@@ -211,6 +211,7 @@ def test_forward_backward_func_without_pipeline_parallel(mocker):
 
     mocker.patch("megatron.core.pipeline_parallel.schedules.custom_backward", return_value=2)
     config = ModelParallelConfig(pipeline_model_parallel_size=1)
+    config.finalize()
     model.config = config
 
     losses_reduced = forward_backward_func(
@@ -271,6 +272,7 @@ def test_forward_backward_func_with_pipeline_parallel(mocker):
     config = ModelParallelConfig(
         pipeline_model_parallel_size=4, sequence_parallel=False, pipeline_dtype=torch.float
     )
+    config.finalize()
     config.hidden_size = hidden_size
     model.config = config
 
@@ -340,6 +342,7 @@ def test_forward_backward_func_with_interleaving(mocker):
         pipeline_dtype=torch.float,
         virtual_pipeline_model_parallel_size=2,
     )
+    config.finalize()
     config.hidden_size = hidden_size
     model.config = config
 
@@ -448,6 +451,7 @@ def test_forward_backward_func_with_uneven_interleaving(mocker):
         pipeline_dtype=torch.float,
         virtual_pipeline_model_parallel_size=2,
     )
+    config.finalize()
     config.hidden_size = hidden_size
     model_a.config = config
     model_b.config = config
@@ -548,6 +552,7 @@ def test_forward_backward_pipelining_without_interleaving_with_custom_pgs(mocker
     config = ModelParallelConfig(
         pipeline_model_parallel_size=4, sequence_parallel=False, pipeline_dtype=torch.float
     )
+    config.finalize()
     config.hidden_size = hidden_size
     config.finalize_model_grads_func = finalize_model_grads
     model.config = config
@@ -656,6 +661,7 @@ def test_forward_backward_pipelining_with_interleaving_with_custom_pgs(mocker):
         pipeline_dtype=torch.float,
         virtual_pipeline_model_parallel_size=2,
     )
+    config.finalize()
     config.hidden_size = hidden_size
     model.config = config
 
@@ -729,6 +735,7 @@ def test_forward_backward_no_pipelining_with_custom_pgs(mocker):
 
     # Minimal config.
     config = ModelParallelConfig(pipeline_model_parallel_size=1)
+    config.finalize()
     model.config = config
 
     grid = HyperCommGrid([2, 1, 1, 4], ["tp", "cp", "pp", "dp"])

@@ -52,6 +52,7 @@ def initialize_expert_layer(seed, glu=True, expert_type='sequential', fp8=False,
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs)
+    transformer_config.finalize()
     if expert_type == 'te_grouped':
         layer_submodules = get_gpt_layer_with_transformer_engine_submodules(
             num_experts=num_moe_experts, moe_grouped_gemm=True

@@ -71,6 +71,7 @@ class TestGPTModelKitchenQuantizationConfig:
                 }
             ),
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_decoder_block_spec(
             config=transformer_config, use_transformer_engine=True
         )
@@ -176,6 +177,7 @@ class TestGPTModelKitchenQuantizationConfig:
                 }
             ),
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_decoder_block_spec(
             config=transformer_config, use_transformer_engine=True
         )
@@ -294,6 +296,7 @@ class TestGPTModelKitchenQuantizationConfig:
                 }
             ),
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_decoder_block_spec(
             config=transformer_config, use_transformer_engine=True
         )
@@ -411,6 +414,7 @@ class TestGPTModelKitchenQuantizationConfig:
                 }
             ),
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_decoder_block_spec(
             config=transformer_config, use_transformer_engine=True
         )
@@ -525,6 +529,7 @@ class TestGPTModelKitchenQuantizationConfig:
                 }
             ),
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_decoder_block_spec(
             config=transformer_config, use_transformer_engine=True
         )
@@ -618,6 +623,7 @@ class TestGPTModelTEQuantizationConfig:
                 }
             ),
         )
+        transformer_config.finalize()
         transformer_layer_spec = get_gpt_decoder_block_spec(
             config=transformer_config, use_transformer_engine=True
         )

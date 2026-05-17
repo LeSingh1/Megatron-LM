@@ -79,6 +79,7 @@ class TestModelOptGPTModel:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         self.default_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),
@@ -142,6 +143,7 @@ class TestModelOptMLAMoE(TestModelOptGPTModel):
             qk_layernorm=True,
             use_cpu_initialization=True,
         )
+        transformer_config.finalize()
         default_spec = get_gpt_decoder_block_spec(transformer_config, use_transformer_engine=True)
         self.default_model = GPTModel(
             config=transformer_config,
@@ -182,6 +184,7 @@ class TestModelOptLlama4MoE(TestModelOptGPTModel):
             qk_l2_norm=True,
             use_cpu_initialization=True,
         )
+        transformer_config.finalize()
         default_spec = get_gpt_decoder_block_spec(
             transformer_config, use_transformer_engine=True, qk_l2_norm=True
         )
@@ -211,6 +214,7 @@ class TestModelOptHybridModel(TestModelOptGPTModel):
         transformer_config = TransformerConfig(
             num_layers=3, hidden_size=256, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
 
         # A Hybrid HybridModel using fused-TE spec (default)
         self.default_model = HybridModel(

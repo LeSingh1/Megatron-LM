@@ -37,6 +37,7 @@ class TestGPTModel:
             tensor_model_parallel_size=self.tensor_model_parallel_size,
             sequence_parallel=False,
         )
+        transformer_config.finalize()
         self.gpt_model = GPTModel(
             config=transformer_config,
             transformer_layer_spec=get_gpt_layer_with_transformer_engine_spec(),
@@ -114,6 +115,7 @@ class TestIsLayerWindowAttention:
         config = TransformerConfig(
             num_layers=4, hidden_size=64, num_attention_heads=8, window_size=None
         )
+        config.finalize()
 
         # Should return False for any layer when window_size is None
         for layer_number in [1, 2, 3, 4]:
@@ -143,6 +145,7 @@ class TestIsLayerWindowAttention:
             window_size=(10, 0),
             window_attn_skip_freq=None,
         )
+        config.finalize()
 
         # Should return True for all layers when skip_freq is None
         for layer_number in [1, 2, 3, 4]:
@@ -162,6 +165,7 @@ class TestIsLayerWindowAttention:
             window_size=(10, 0),
             window_attn_skip_freq=3,  # Skip every 3rd layer
         )
+        config.finalize()
 
         # Layer numbers are 1-indexed
         # Layers 3, 6 should NOT use window attention (skip)
@@ -192,6 +196,7 @@ class TestIsLayerWindowAttention:
             window_size=(10, 0),
             window_attn_skip_freq=[True, False, True, False, True, False],
         )
+        config.finalize()
 
         # List is 0-indexed, but layer_number is 1-indexed
         # So layer 1 uses index 0, layer 2 uses index 1, etc.
@@ -219,6 +224,7 @@ class TestIsLayerWindowAttention:
             window_size=(10, 0),
             window_attn_skip_freq=[1, 0, 2, 0],  # Non-boolean values
         )
+        config.finalize()
 
         # bool(1) = True, bool(0) = False, bool(2) = True
         expected_results = {
@@ -243,6 +249,7 @@ class TestIsLayerWindowAttention:
             window_size=(10, 0),
             window_attn_skip_freq="invalid",  # String is invalid
         )
+        config.finalize()
 
         with pytest.raises(ValueError) as exc_info:
             is_layer_window_attention(config.window_size, config.window_attn_skip_freq, 1)
@@ -257,6 +264,7 @@ class TestIsLayerWindowAttention:
         config = TransformerConfig(
             num_layers=1, hidden_size=64, num_attention_heads=8, window_size=(5, 0)
         )
+        config.finalize()
 
         assert (
             is_layer_window_attention(config.window_size, config.window_attn_skip_freq, 1) == True
@@ -270,6 +278,7 @@ class TestIsLayerWindowAttention:
             window_size=(10, 0),
             window_attn_skip_freq=10,
         )
+        config.finalize()
 
         # Layer 100 should not use window attention (100 % 10 == 0)
         assert (
@@ -287,6 +296,7 @@ class TestIsLayerWindowAttention:
         config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=8, window_size=(10, 0)
         )
+        config.finalize()
 
         assert (
             is_layer_window_attention(config.window_size, config.window_attn_skip_freq, 1) == True
@@ -311,6 +321,7 @@ class TestIsLayerWindowAttention:
             window_size=[10, 0],
             window_attn_skip_freq=2,
         )
+        config.finalize()
 
         # Test layer 0 (though typically layers are 1-indexed)
         # 0 % 2 == 0, so should return False
@@ -329,15 +340,25 @@ class TestIsLayerWindowAttention:
 
     def test_comprehensive_scenario(self):
         """Test a comprehensive scenario with multiple configurations."""
+        _cfg1 = TransformerConfig(
+            num_layers=12,
+            hidden_size=64,
+            num_attention_heads=8,
+            window_size=[16, 0],
+            window_attn_skip_freq=4,
+        )
+        _cfg1.finalize()
+        _cfg2 = TransformerConfig(
+            num_layers=6,
+            hidden_size=64,
+            num_attention_heads=8,
+            window_size=[8, 8],
+            window_attn_skip_freq=[True, True, False, False, True, False],
+        )
+        _cfg2.finalize()
         scenarios = [
             {
-                "config": TransformerConfig(
-                    num_layers=12,
-                    hidden_size=64,
-                    num_attention_heads=8,
-                    window_size=[16, 0],
-                    window_attn_skip_freq=4,
-                ),
+                "config": _cfg1,
                 "expected": {
                     1: True,
                     2: True,
@@ -354,13 +375,7 @@ class TestIsLayerWindowAttention:
                 },
             },
             {
-                "config": TransformerConfig(
-                    num_layers=6,
-                    hidden_size=64,
-                    num_attention_heads=8,
-                    window_size=[8, 8],
-                    window_attn_skip_freq=[True, True, False, False, True, False],
-                ),
+                "config": _cfg2,
                 "expected": {1: True, 2: True, 3: False, 4: False, 5: True, 6: False},
             },
         ]
@@ -391,6 +406,7 @@ class TestIsLayerWindowAttentionIntegration:
             window_attn_skip_freq=2,
             use_cpu_initialization=True,
         )
+        config.finalize()
 
         # Function should work with complete config
         for layer in range(1, 9):
@@ -409,6 +425,7 @@ class TestIsLayerWindowAttentionIntegration:
             window_size=[10, 0],
             window_attn_skip_freq=list(range(1000)),  # Large list
         )
+        config.finalize()
 
         # This should complete without performance issues
         results = []

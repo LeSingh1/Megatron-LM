@@ -64,6 +64,7 @@ def heterogeneous_gpt_model(request, tmp_path):
         perform_initialization=False,
         heterogeneous_layers_config_path=str(block_config_file),
     )
+    transformer_config.finalize()
 
     return GPTModel(
         transformer_config,

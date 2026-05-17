@@ -92,6 +92,7 @@ class TestGatedDeltaNet:
             linear_attention_freq=[1],
             transformer_impl="transformer_engine",
         )
+        self.transformer_config.finalize()
         gdn_submodules = get_experimental_attention_variant_module_spec(
             config=self.transformer_config
         ).submodules
@@ -382,6 +383,7 @@ def test_parallel_gated_delta_net_correctness(tmp_path_dist_ckpt, sequence_packi
         linear_attention_freq=[1],
         transformer_impl="transformer_engine",
     )
+    transformer_config.finalize()
 
     transformer_layer_spec = get_transformer_block_with_experimental_attention_variant_spec(
         config=transformer_config, vp_stage=None, pp_rank=0

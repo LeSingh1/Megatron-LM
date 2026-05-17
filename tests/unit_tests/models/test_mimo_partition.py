@@ -55,6 +55,7 @@ class TestPartitionConfig:
             context_parallel_size=1,
             sequence_parallel=False,
         )
+        mp.finalize()
         with patch('megatron.core.models.mimo.partition.utils.get_pg_size', return_value=1):
             cfg = PartitionConfig.from_mp_config(mp, max_seq_len=512)
         assert cfg.use_cp is False
@@ -65,6 +66,7 @@ class TestPartitionConfig:
 
     def test_from_mp_config_kv_format_thd(self):
         mp = TransformerConfig(num_layers=1, hidden_size=64, num_attention_heads=4)
+        mp.finalize()
         with patch('megatron.core.models.mimo.partition.utils.get_pg_size', return_value=1):
             cfg = PartitionConfig.from_mp_config(mp, max_seq_len=512, kv_format='thd')
         assert cfg.kv_format == 'thd'
@@ -74,6 +76,7 @@ class TestPartitionConfig:
         mp = TransformerConfig(
             num_layers=1, hidden_size=64, num_attention_heads=4, context_parallel_size=2
         )
+        mp.finalize()
         with patch('megatron.core.models.mimo.partition.utils.get_pg_size', return_value=2):
             cfg = PartitionConfig.from_mp_config(mp, max_seq_len=512, cp_group=mock_cp_group)
         assert cfg.use_cp is True
@@ -88,6 +91,7 @@ class TestPartitionConfig:
             tensor_model_parallel_size=2,
             sequence_parallel=True,
         )
+        mp.finalize()
         with patch('megatron.core.models.mimo.partition.utils.get_pg_size', return_value=1):
             cfg = PartitionConfig.from_mp_config(mp, max_seq_len=512, tp_group=mock_tp_group)
         assert cfg.seq_parallel is True
@@ -98,6 +102,7 @@ class TestPartitionConfig:
         mp = TransformerConfig(
             num_layers=1, hidden_size=64, num_attention_heads=4, context_parallel_size=2
         )
+        mp.finalize()
         with (
             patch(
                 'megatron.core.models.mimo.partition.utils.get_context_parallel_group',
@@ -117,6 +122,7 @@ class TestPartitionConfig:
             tensor_model_parallel_size=2,
             sequence_parallel=True,
         )
+        mp.finalize()
         with (
             patch(
                 'megatron.core.models.mimo.partition.utils.get_tensor_model_parallel_group',

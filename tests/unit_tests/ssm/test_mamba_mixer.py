@@ -40,6 +40,7 @@ class TestMambaMixer:
             use_cpu_initialization=True,
             use_mamba_mem_eff_path=use_mem_eff_path,
         )
+        transformer_config.finalize()
         assert isinstance(hybrid_stack_spec.submodules, HybridStackSubmodules)
         assert isinstance(hybrid_stack_spec.submodules.mamba_layer.submodules, MambaLayerSubmodules)
         assert isinstance(
@@ -128,6 +129,7 @@ class TestMambaMixerErrorChecks:
             use_cpu_initialization=True,
             mamba_num_groups=ngroups,
         )
+        transformer_config.finalize()
         assert isinstance(hybrid_stack_spec.submodules, HybridStackSubmodules)
         assert isinstance(hybrid_stack_spec.submodules.mamba_layer.submodules, MambaLayerSubmodules)
         assert isinstance(

@@ -77,7 +77,9 @@ NANOV3_BASE = dict(
 def _make_base_config(**overrides):
     """Create a TransformerConfig with nanov3-like defaults."""
     params = {**NANOV3_BASE, **overrides}
-    return TransformerConfig(**params)
+    config = TransformerConfig(**params)
+    config.finalize()
+    return config
 
 
 # ──────────────────────────────────────────────────────────────────────

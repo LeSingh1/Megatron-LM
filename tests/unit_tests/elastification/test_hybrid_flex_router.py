@@ -34,6 +34,7 @@ def _router_config(
         num_moe_experts=num_moe_experts,
         use_cpu_initialization=True,
     )
+    config.finalize()
     flex_fields = dict(
         flextron=True,
         soft_mask=True,

@@ -31,6 +31,7 @@ class TestParallelTransformerBlock:
         self.transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        self.transformer_config.finalize()
         self.parallel_transformer_block = TransformerBlock(
             self.transformer_config, get_gpt_layer_with_transformer_engine_spec()
         )
@@ -337,6 +338,7 @@ class TestParallelTransformerBlock:
             recompute_method='uniform',
             recompute_num_layers=3,
         )
+        transformer_config.finalize()
         uniform_block = TransformerBlock(
             transformer_config, get_gpt_layer_with_transformer_engine_spec()
         )
@@ -434,6 +436,7 @@ class TestPipelineParallelTransformerBlock:
                 hidden_size=128,
                 num_attention_heads=16,
             )
+            transformer_config.finalize()
             total_build_layers = 0
             for i in range(pipeline_model_parallel_size):
                 if virtual_pipeline_model_parallel_size is not None:
@@ -498,6 +501,7 @@ class TestProcessGroupTransformerBlock:
         self.transformer_config = TransformerConfig(
             num_layers=2, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        self.transformer_config.finalize()
         self.transformer_block = TransformerBlock(
             self.transformer_config,
             get_gpt_layer_with_transformer_engine_spec(),
@@ -599,6 +603,7 @@ class TestMixedProcessGroups:
             context_parallel_size=cp_size,
             bf16=True,
         )
+        self.transformer_config.finalize()
         self.transformer_block = TransformerBlock(
             self.transformer_config, get_gpt_layer_with_transformer_engine_spec()
         )
@@ -696,6 +701,7 @@ class TestPipelineParallelLayoutTransformerBlock:
                 hidden_size=128,
                 num_attention_heads=16,
             )
+            transformer_config.finalize()
             total_build_layers = 0
             for i in range(pp_size):
                 parallel_state.set_pipeline_model_parallel_rank(i)
@@ -752,6 +758,7 @@ class TestPipelineParallelLayoutTransformerBlock:
             pipeline_model_parallel_layout=pipeline_model_parallel_layout,
         )
         transformer_config = TransformerConfig(**default_config_kwargs)
+        transformer_config.finalize()
         gpt_model = []
         for i in range(vpp_size):
             pre_process = mpu.is_pipeline_first_stage(ignore_virtual=False, vp_stage=i)

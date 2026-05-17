@@ -110,17 +110,18 @@ class TestLayerWiseOptimizer:
             from megatron.training.training import wrap_model_chunks_with_ddp
 
             ddp_config = DistributedDataParallelConfig()
+            ddp_config.finalize()
+            _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+            _tcfg.finalize()
             model = wrap_model_chunks_with_ddp(
-                [model],
-                TransformerConfig(num_attention_heads=1, num_layers=1),
-                ddp_config,
-                use_layer_wise_distributed_optimizer=use_layer_wise,
+                [model], _tcfg, ddp_config, use_layer_wise_distributed_optimizer=use_layer_wise
             )[0]
         else:
             ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-            model = DistributedDataParallel(
-                TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-            )
+            ddp_config.finalize()
+            _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+            _tcfg.finalize()
+            model = DistributedDataParallel(_tcfg, ddp_config, model)
         if copy_from:
             model.module.load_state_dict(copy_from.module.state_dict())
         else:
@@ -136,6 +137,7 @@ class TestLayerWiseOptimizer:
             muon_tp_mode="duplicated",
             use_layer_wise_distributed_optimizer=use_layer_wise,
         )
+        optimizer_config.finalize()
 
         pg_collection = ProcessGroupCollection.use_mpu_process_groups()
         pg_collection.dp_cp = parallel_state.get_data_parallel_group(with_context_parallel=True)
@@ -196,11 +198,11 @@ class TestLayerWiseOptimizer:
                 grad_reduce_in_fp32=grad_reduce_in_fp32,
                 bucket_size=bucket_size,
             )
+            ddp_config.finalize()
+            _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+            _tcfg.finalize()
             model = wrap_model_chunks_with_ddp(
-                [model],
-                TransformerConfig(num_attention_heads=1, num_layers=1),
-                ddp_config,
-                use_layer_wise_distributed_optimizer=True,
+                [model], _tcfg, ddp_config, use_layer_wise_distributed_optimizer=True
             )[0]
         else:
             ddp_config = DistributedDataParallelConfig(
@@ -210,9 +212,10 @@ class TestLayerWiseOptimizer:
                 grad_reduce_in_fp32=grad_reduce_in_fp32,
                 bucket_size=bucket_size,
             )
-            model = DistributedDataParallel(
-                TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-            )
+            ddp_config.finalize()
+            _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+            _tcfg.finalize()
+            model = DistributedDataParallel(_tcfg, ddp_config, model)
         if copy_from:
             model.module.load_state_dict(copy_from.module.state_dict())
         else:
@@ -229,6 +232,7 @@ class TestLayerWiseOptimizer:
             muon_tp_mode="duplicated",
             use_layer_wise_distributed_optimizer=True,
         )
+        optimizer_config.finalize()
 
         pg_collection = ProcessGroupCollection.use_mpu_process_groups()
         pg_collection.dp_cp = parallel_state.get_data_parallel_group(with_context_parallel=True)
@@ -393,13 +397,15 @@ class TestLayerWiseOptimizer:
         )
 
         ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-        model = DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-        )
+        ddp_config.finalize()
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        model = DistributedDataParallel(_tcfg, ddp_config, model)
 
         optimizer_config = OptimizerConfig(
             optimizer='adam', lr=0.01, bf16=True, use_distributed_optimizer=False
         )
+        optimizer_config.finalize()
 
         # Split parameters into two groups for testing multiple optimizers
         params = list(model.parameters())
@@ -451,9 +457,10 @@ class TestLayerWiseOptimizer:
         model.requires_grad_(True)
 
         ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-        model = DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-        )
+        ddp_config.finalize()
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        model = DistributedDataParallel(_tcfg, ddp_config, model)
 
         pg_collection = ProcessGroupCollection.use_mpu_process_groups()
         pg_collection.dp_cp = parallel_state.get_data_parallel_group(with_context_parallel=True)
@@ -467,6 +474,7 @@ class TestLayerWiseOptimizer:
             use_distributed_optimizer=False,
             muon_tp_mode="duplicated",
         )
+        optimizer_config.finalize()
         muon_optimizer = get_megatron_optimizer(
             config=optimizer_config, model_chunks=[model], use_gloo_process_groups=True
         )
@@ -479,6 +487,7 @@ class TestLayerWiseOptimizer:
         lw_config = OptimizerConfig(
             optimizer='muon', lr=0.01, bf16=True, use_distributed_optimizer=False
         )
+        lw_config.finalize()
         with pytest.raises(
             TypeError, match='LayerWiseDistributedOptimizer expects base torch optimizers'
         ):

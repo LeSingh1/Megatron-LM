@@ -107,6 +107,7 @@ class TextGenerationControllerTestBase:
             ),
             cuda_graph_impl=cuda_graph_impl,
         )
+        transformer_config.finalize()
         if dtype == torch.bfloat16:
             transformer_config.bf16 = True
 

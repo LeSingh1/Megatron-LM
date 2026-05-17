@@ -71,6 +71,7 @@ class TestMultiTokenPredictionLayer:
             sequence_parallel=True if tp > 1 else False,
             context_parallel_size=cp,  # Enable CP for MTP testing
         )
+        config.finalize()
         if use_te:
             transformer_layer_spec = get_gpt_layer_with_transformer_engine_spec()
         else:

@@ -47,6 +47,7 @@ def initialize_gpt_model(seed, layer_spec_fn=gpt_te_spec, vocab_size=128, **conf
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs)
+    transformer_config.finalize()
     pre_process = ps.is_pipeline_first_stage()
     post_process = ps.is_pipeline_last_stage()
     model = GPTModel(

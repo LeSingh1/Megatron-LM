@@ -39,6 +39,7 @@ class TestHybridModel:
             num_attention_heads=4,
             use_cpu_initialization=True,
         )
+        model_config.finalize()
         self.model = HybridModel(
             config=model_config,
             hybrid_stack_spec=hybrid_stack_spec,
@@ -106,6 +107,7 @@ class TestHybridModel:
             params_dtype=torch.bfloat16,  # Needed for backend=flash
             attention_backend=AttnBackend.flash,  # Needed for packed sequence
         )
+        model_config.finalize()
         vocab_size = 100
         model = HybridModel(
             config=model_config,
@@ -267,6 +269,7 @@ class TestHybridModel:
             pipeline_model_parallel_size=pp_size,
             pipeline_dtype=torch.bfloat16,
         )
+        model_config.finalize()
 
         model = HybridModel(
             config=model_config,
@@ -316,6 +319,7 @@ class TestHybridQKLayernorm:
             use_cpu_initialization=True,
             **config_overrides,
         )
+        config.finalize()
         return HybridModel(
             config=config,
             hybrid_stack_spec=hybrid_stack_spec,
@@ -393,6 +397,7 @@ class TestHybridQKLayernorm:
             use_cpu_initialization=True,
             qk_layernorm=True,
         )
+        config.finalize()
         model = HybridModel(
             config=config,
             hybrid_stack_spec=spec,
@@ -450,6 +455,7 @@ class TestHybridWithDynamicInference:
             fp8="hybrid",
             fp8_recipe="tensorwise",
         )
+        model_config.finalize()
 
         self.model = HybridModel(
             config=model_config,
@@ -542,6 +548,7 @@ def _make_yarn_config(**kwargs):
         use_cpu_initialization=True,
         **kwargs,
     )
+    cfg.finalize()
     # Yarn-specific attributes are set dynamically on the config (not TransformerConfig fields).
     cfg.yarn_rotary_scaling_factor = 2.0
     cfg.yarn_original_max_position_embeddings = 4

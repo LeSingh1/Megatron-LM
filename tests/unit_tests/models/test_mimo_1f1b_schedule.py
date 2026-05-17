@@ -254,6 +254,7 @@ def get_language_model_spec(
         calculate_per_token_loss=per_token_loss,
         **extra_kwargs,
     )
+    lm_config.finalize()
     return ModuleSpec(
         module=GPTModel,
         params={
@@ -271,6 +272,7 @@ def get_language_model_spec(
 def get_projection_config(hidden_size, bias=True):
     """Return a TransformerConfig for the vision projection MLP."""
     cfg = TransformerConfig(num_layers=1, hidden_size=hidden_size, num_attention_heads=1)
+    cfg.finalize()
     cfg.ffn_hidden_size = hidden_size
     cfg.bias_activation_fusion = bool(bias)
     cfg.add_bias_linear = bool(bias)
@@ -335,6 +337,7 @@ def get_vision_submodules_spec(
         calculate_per_token_loss=per_token_loss,
         **extra_kwargs,
     )
+    vision_config.finalize()
     vision_encoder_spec = ModuleSpec(
         module=TransformerBlock,
         params={
@@ -447,6 +450,7 @@ def get_mimo_model(
         ddp_config = DistributedDataParallelConfig(
             overlap_grad_reduce=True, bucket_size=10000, use_distributed_optimizer=True
         )
+        ddp_config.finalize()
 
     if mimo_model.language_model is not None:
         mimo_model.language_model = DistributedDataParallel(
@@ -628,6 +632,7 @@ def run_mimo_1f1b_test(
         bf16=True,
         use_distributed_optimizer=True,
     )
+    opt_config.finalize()
     optimizer = get_mimo_optimizer(mimo_model, opt_config)
 
     communicator = MultiModulePipelineCommunicator(

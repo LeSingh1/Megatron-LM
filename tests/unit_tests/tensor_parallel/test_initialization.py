@@ -20,6 +20,7 @@ class Test:
     transformer_config = TransformerConfig(
         num_layers=1, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
     )
+    transformer_config.finalize()
 
     def teardown_method(self, method):
         Utils.destroy_model_parallel()

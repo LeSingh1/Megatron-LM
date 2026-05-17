@@ -324,6 +324,7 @@ def build_gpt_layer(
         cp_comm_type="p2p" if cp_size > 1 else None,
         deterministic_mode=deterministic,
     )
+    config.finalize()
     spec = get_gpt_layer_with_transformer_engine_spec()
     if use_mock_attention:
         spec.submodules.self_attention.submodules.core_attention = MockCoreAttention

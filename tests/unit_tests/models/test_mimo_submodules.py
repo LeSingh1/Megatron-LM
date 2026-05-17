@@ -59,6 +59,7 @@ class TestBaseSubmodule:
         self.vision_config = TransformerConfig(
             num_layers=1, hidden_size=64, num_attention_heads=4, use_cpu_initialization=True
         )
+        self.vision_config.finalize()
 
         # Create layer spec for transformer
         self.layer_spec = get_gpt_layer_with_transformer_engine_spec()
@@ -187,6 +188,7 @@ class TestVisionSubmodule:
             num_attention_heads=4,
             use_cpu_initialization=True,
         )
+        self.vision_config.finalize()
 
         # Create layer spec for transformer
         self.layer_spec = get_gpt_layer_with_transformer_engine_spec()

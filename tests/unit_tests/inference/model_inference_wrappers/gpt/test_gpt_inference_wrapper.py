@@ -35,6 +35,7 @@ class TestGPTInferenceWrapper:
             num_attention_heads=4,
             use_cpu_initialization=True,
         )
+        transformer_config.finalize()
 
         gpt_model = GPTModel(
             config=transformer_config,

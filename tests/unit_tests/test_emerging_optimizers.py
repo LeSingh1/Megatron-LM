@@ -149,9 +149,10 @@ class TestMuonOptimizerMultiRank:
             DDP-wrapped model
         """
         ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-        return DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-        )
+        ddp_config.finalize()
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        return DistributedDataParallel(_tcfg, ddp_config, model)
 
     def create_ddp_model_for_layerwise(self, model, use_param_layout=False):
         """Wrap model in DDP for layer-wise distributed optimizer tests.
@@ -168,11 +169,11 @@ class TestMuonOptimizerMultiRank:
             from megatron.training.training import wrap_model_chunks_with_ddp
 
             ddp_config = DistributedDataParallelConfig()
+            ddp_config.finalize()
+            _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+            _tcfg.finalize()
             wrapped = wrap_model_chunks_with_ddp(
-                [model],
-                TransformerConfig(num_attention_heads=1, num_layers=1),
-                ddp_config,
-                use_layer_wise_distributed_optimizer=True,
+                [model], _tcfg, ddp_config, use_layer_wise_distributed_optimizer=True
             )
             return wrapped[0]
         return self.create_ddp_model(model)
@@ -201,6 +202,7 @@ class TestMuonOptimizerMultiRank:
             muon_scale_mode="spectral",
             muon_tp_mode="duplicated",
         )
+        optimizer_config.finalize()
 
         # Test creating the optimizer
         optimizer = get_megatron_optimizer(
@@ -262,6 +264,7 @@ class TestMuonOptimizerMultiRank:
             fp16=True,  # This should cause an exception
             use_distributed_optimizer=False,
         )
+        optimizer_config_fp16.finalize()
 
         with pytest.raises(Exception, match='emerging optimizer with fp16 is not supported'):
             get_megatron_optimizer(config=optimizer_config_fp16, model_chunks=[model])
@@ -274,6 +277,7 @@ class TestMuonOptimizerMultiRank:
             use_distributed_optimizer=False,
             muon_num_ns_steps=0,  # This should cause an exception
         )
+        optimizer_config_invalid_ns.finalize()
 
         with pytest.raises(ValueError, match='num_ns_steps must be at least 1'):
             get_megatron_optimizer(config=optimizer_config_invalid_ns, model_chunks=[model])
@@ -297,6 +301,7 @@ class TestMuonOptimizerMultiRank:
             muon_scale_mode="spectral",
             muon_tp_mode="duplicated",
         )
+        optimizer_config.finalize()
 
         # use_layer_wise_distributed_optimizer=True triggers LayerWiseDistributedOptimizer
         optimizer = get_megatron_optimizer(
@@ -341,6 +346,7 @@ class TestMuonOptimizerMultiRank:
             muon_scale_mode="spectral",
             muon_tp_mode="duplicated",
         )
+        optimizer_config.finalize()
 
         with pytest.raises(ValueError, match="dist_ prefix"):
             get_megatron_muon_optimizer(
@@ -773,9 +779,10 @@ class TestMuonCoefficientTypeMultiRank:
 
     def create_ddp_model(self, model):
         ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-        return DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-        )
+        ddp_config.finalize()
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        return DistributedDataParallel(_tcfg, ddp_config, model)
 
     @pytest.mark.parametrize("coefficient_type", _TESTABLE_COEFFICIENT_TYPES)
     def test_get_megatron_optimizer_coefficient_type(self, coefficient_type):
@@ -794,6 +801,7 @@ class TestMuonCoefficientTypeMultiRank:
             muon_num_ns_steps=_DEFAULT_NS_STEPS,
             muon_tp_mode="duplicated",
         )
+        optimizer_config.finalize()
 
         optimizer = get_megatron_optimizer(
             config=optimizer_config, model_chunks=[model], use_gloo_process_groups=True
@@ -1129,9 +1137,10 @@ class TestAdaptiveMuonOptimizerMultiRank:
     def create_ddp_model(self, model):
         """Wrap model in DDP."""
         ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-        return DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-        )
+        ddp_config.finalize()
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        return DistributedDataParallel(_tcfg, ddp_config, model)
 
     def test_get_megatron_optimizer_adaptive_muon_smoke(self):
         """Smoke test for get_megatron_optimizer with adaptive_muon."""
@@ -1158,6 +1167,7 @@ class TestAdaptiveMuonOptimizerMultiRank:
             adaptive_muon_beta2=0.95,
             adaptive_muon_eps=1e-8,
         )
+        optimizer_config.finalize()
 
         optimizer = get_megatron_optimizer(
             config=optimizer_config, model_chunks=[model], use_gloo_process_groups=True
@@ -1205,6 +1215,7 @@ class TestAdaptiveMuonOptimizerMultiRank:
         optimizer_config_fp16 = OptimizerConfig(
             optimizer='adaptive_muon', lr=0.01, fp16=True, use_distributed_optimizer=False
         )
+        optimizer_config_fp16.finalize()
 
         with pytest.raises(Exception, match='emerging optimizer with fp16 is not supported'):
             get_megatron_optimizer(config=optimizer_config_fp16, model_chunks=[model])
@@ -1490,9 +1501,10 @@ class TestSoapOptimizerMultiRank:
     def create_ddp_model(self, model):
         """Wrap model in DDP."""
         ddp_config = DistributedDataParallelConfig(use_distributed_optimizer=False)
-        return DistributedDataParallel(
-            TransformerConfig(num_attention_heads=1, num_layers=1), ddp_config, model
-        )
+        ddp_config.finalize()
+        _tcfg = TransformerConfig(num_attention_heads=1, num_layers=1)
+        _tcfg.finalize()
+        return DistributedDataParallel(_tcfg, ddp_config, model)
 
     def test_get_megatron_optimizer_soap_smoke(self):
         """Smoke test for get_megatron_optimizer with SOAP."""
@@ -1513,6 +1525,7 @@ class TestSoapOptimizerMultiRank:
             soap_precondition_frequency=1,
             soap_use_kl_shampoo=True,
         )
+        optimizer_config.finalize()
 
         optimizer = get_megatron_optimizer(
             config=optimizer_config, model_chunks=[model], use_gloo_process_groups=True
@@ -1567,6 +1580,7 @@ class TestSoapOptimizerMultiRank:
         optimizer_config_fp16 = OptimizerConfig(
             optimizer='soap', lr=0.01, fp16=True, use_distributed_optimizer=False
         )
+        optimizer_config_fp16.finalize()
 
         with pytest.raises(Exception, match='emerging optimizer with fp16 is not supported'):
             get_megatron_optimizer(config=optimizer_config_fp16, model_chunks=[model])

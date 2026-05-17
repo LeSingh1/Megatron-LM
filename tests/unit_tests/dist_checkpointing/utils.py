@@ -47,6 +47,7 @@ def initialize_gpt_model(
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs, gated_linear_unit=use_glu)
+    transformer_config.finalize()
     model = GPTModel(
         config=transformer_config,
         transformer_layer_spec=get_gpt_layer_local_spec(),
@@ -93,6 +94,7 @@ def initialize_moe_model(
     )
     default_config_kwargs.update(**config_kwargs)
     transformer_config = TransformerConfig(**default_config_kwargs, gated_linear_unit=use_glu)
+    transformer_config.finalize()
     if use_te:
         spec = get_gpt_layer_with_transformer_engine_spec(
             num_experts=expert_num, moe_grouped_gemm=use_grouped_mlp
@@ -227,6 +229,7 @@ def setup_model_and_optimizer(
         use_layer_wise_distributed_optimizer=use_layer_wise,
         optimizer=optimizer,
     )
+    config.finalize()
 
     if optimizer_type in ('muon', 'dist_muon'):
         config.lr = 0.0
@@ -334,6 +337,7 @@ def setup_moe_model_and_optimizer(
         use_layer_wise_distributed_optimizer=use_layer_wise,
         optimizer=optimizer,
     )
+    config.finalize()
 
     if optimizer_type in ('muon', 'dist_muon'):
         config.lr = 0.0

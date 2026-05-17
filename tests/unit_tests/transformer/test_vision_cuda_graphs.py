@@ -76,6 +76,7 @@ class TestVisionLayerIsGraphable:
             use_cpu_initialization=True,
             cuda_graph_impl="transformer_engine",
         )
+        config.finalize()
         from megatron.core.transformer.transformer_block import TransformerBlock
 
         block = TransformerBlock(config, get_vit_layer_with_transformer_engine_spec())
@@ -219,6 +220,7 @@ class TestVisionTECudaGraphHelper:
             num_attention_heads=4,
             use_cpu_initialization=True,
         )
+        language_config.finalize()
 
         self.vision_config = TransformerConfig(
             num_layers=self.vision_num_layers,
@@ -229,6 +231,7 @@ class TestVisionTECudaGraphHelper:
             bf16=True,
             pipeline_dtype=torch.bfloat16,
         )
+        self.vision_config.finalize()
 
         vision_projection_config = TransformerConfig(
             num_layers=1,
@@ -239,6 +242,7 @@ class TestVisionTECudaGraphHelper:
             bf16=True,
             pipeline_dtype=torch.bfloat16,
         )
+        vision_projection_config.finalize()
 
         language_layer_submodules = get_gpt_layer_with_transformer_engine_submodules()
         vision_layer_spec = get_vit_layer_with_transformer_engine_spec()
@@ -480,6 +484,7 @@ class TestVisionTECudaGraphHelperPP2:
             bf16=True,
             pipeline_dtype=torch.bfloat16,
         )
+        language_config.finalize()
 
         self.vision_config = TransformerConfig(
             num_layers=self.vision_num_layers,
@@ -490,6 +495,7 @@ class TestVisionTECudaGraphHelperPP2:
             bf16=True,
             pipeline_dtype=torch.bfloat16,
         )
+        self.vision_config.finalize()
 
         vision_projection_config = TransformerConfig(
             num_layers=1,
@@ -500,6 +506,7 @@ class TestVisionTECudaGraphHelperPP2:
             bf16=True,
             pipeline_dtype=torch.bfloat16,
         )
+        vision_projection_config.finalize()
 
         language_layer_submodules = get_gpt_layer_with_transformer_engine_submodules()
         vision_layer_spec = get_vit_layer_with_transformer_engine_spec()

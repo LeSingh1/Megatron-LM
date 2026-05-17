@@ -54,6 +54,7 @@ class TestEncoderDecoderTextGenerationController:
             pipeline_model_parallel_size=1,
             attention_backend=AttnBackend.unfused,
         )
+        transformer_config.finalize()
 
         encoder_config = deepcopy(transformer_config)
         encoder_config.num_layers = transformer_config.num_layers

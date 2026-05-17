@@ -49,6 +49,7 @@ class TestLatentMoELayer:
             add_bias_linear=False,
             moe_latent_size=moe_latent_size,
         )
+        self.transformer_config.finalize()
         if use_te:
             transformer_layer_submodules = get_gpt_layer_with_transformer_engine_submodules(
                 num_experts=num_moe_experts, moe_grouped_gemm=grouped_gemm

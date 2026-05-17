@@ -29,6 +29,7 @@ class TestTRTLLMSingleDeviceConverter:
             hidden_size=hidden_dim,
             ffn_hidden_size=hidden_dim * 4,
         )
+        model_config.finalize()
 
         dtype = DataType.bfloat16
 
@@ -190,6 +191,7 @@ class TestTRTLLMSingleDeviceConverter:
             hidden_size=hidden_dim,
             ffn_hidden_size=hidden_dim * 4,
         )
+        model_config.finalize()
 
         dtype = DataType.bfloat16
 
@@ -320,6 +322,7 @@ class TestTRTLLMSingleDeviceConverter:
             hidden_size=hidden_dim,
             ffn_hidden_size=hidden_dim * 4,
         )
+        model_config.finalize()
 
         dtype = DataType.bfloat16
 
@@ -413,6 +416,7 @@ class TestTRTLLMSingleDeviceConverter:
             hidden_size=hidden_dim,
             ffn_hidden_size=hidden_dim * 4,
         )
+        model_config.finalize()
 
         dtype = DataType.bfloat16
 
@@ -506,6 +510,7 @@ class TestTRTLLMSingleDeviceConverter:
             hidden_size=hidden_dim,
             ffn_hidden_size=hidden_dim * 4,
         )
+        model_config.finalize()
 
         dtype = DataType.bfloat16
 

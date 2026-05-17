@@ -28,6 +28,7 @@ class TestParallelTransformerLayer:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=12, num_attention_heads=4, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         self.parallel_transformer_layer = TransformerLayer(
             transformer_config, get_gpt_layer_with_transformer_engine_submodules()
         )
@@ -82,6 +83,7 @@ class TestParallelTransformerLayer:
                 hidden_dropout=0.0,
                 attention_dropout=0.0,
             )
+            transformer_config.finalize()
             parallel_transformer_layer = TransformerLayer(
                 transformer_config, get_gpt_layer_with_transformer_engine_submodules()
             )
@@ -267,6 +269,7 @@ class TestParallelTransformerLayer:
         config = TransformerConfig(
             hidden_size=512, num_attention_heads=8, use_cpu_initialization=True, **config_params
         )
+        config.finalize()
 
         for (pipeline_rank, vp_stage), expected_offset in expected_offsets.items():
             original_get_pipeline_rank = parallel_state.get_pipeline_model_parallel_rank
@@ -291,6 +294,7 @@ class TestParallelTransformerLayer:
         transformer_config = TransformerConfig(
             num_layers=2, hidden_size=128, num_attention_heads=8, use_cpu_initialization=True
         )
+        transformer_config.finalize()
         parallel_transformer_layer = TransformerLayer(
             transformer_config, get_gpt_layer_with_transformer_engine_submodules()
         )
