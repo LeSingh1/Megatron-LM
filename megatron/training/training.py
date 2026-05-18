@@ -1560,6 +1560,7 @@ def get_model(model_provider_func, model_type=ModelType.encoder_or_decoder, wrap
         config = get_model_config(model[0])
 
         ddp_config = get_megatron_ddp_config(args)
+        ddp_config.finalize()
         if not getattr(args, "use_torch_fsdp2", False):
             if ddp_config.num_buckets is not None:
                 ddp_config.bucket_size = num_parameters // ddp_config.num_buckets
@@ -1750,6 +1751,7 @@ def setup_model_and_optimizer(
             update_train_iters(args)
     else:
         config, config_overrides = get_megatron_optimizer_config(args)
+        config.finalize()
         config.timers = timers
         if getattr(args, "use_mup", False):
             model_config_source = (
