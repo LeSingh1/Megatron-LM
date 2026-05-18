@@ -3,7 +3,6 @@
 # Copyright (c) 2025 DeepSeek
 # Licensed under the MIT License - https://github.com/deepseek-ai/DeepEP/blob/main/LICENSE
 
-import os
 from typing import Optional
 
 from megatron.core.utils import internal_api
@@ -269,7 +268,6 @@ else:
 
 
 try:
-    import hybrid_ep_cpp
     from deep_ep import HybridEPBuffer
 
     HAVE_HYBRIDEP = True
@@ -287,29 +285,35 @@ def _round_up_to_multiple(value: int, multiple: int) -> int:
     return ((value + multiple - 1) // multiple) * multiple
 
 
-def _hybrid_ep_num_nodes(group: torch.distributed.ProcessGroup) -> int:
-    """Mirror HybridEP's NVLink-domain detection without constructing the full buffer."""
-    ranks_per_nvlink_domain_env = os.getenv("NUM_OF_HYBRID_EP_RANKS_PER_NVLINK_DOMAIN")
-    if ranks_per_nvlink_domain_env is not None:
-        ranks_per_nvlink_domain = int(ranks_per_nvlink_domain_env)
-    else:
-        allocator = hybrid_ep_cpp.ExtendedMemoryAllocator()
-        ranks_per_nvlink_domain = allocator.detect_accessible_ranks(group)
-
-    assert group.size() % ranks_per_nvlink_domain == 0, (
-        f"The number of ranks {group.size()} should be divisible by the number of ranks per "
-        f"NVLink domain {ranks_per_nvlink_domain}."
+def _hybrid_ep_buffer_tokens(num_tokens: int) -> int:
+    return max(
+        _round_up_to_multiple(num_tokens, _HYBRID_EP_TOKEN_ALIGNMENT), _HYBRID_EP_MIN_BUFFER_TOKENS
     )
-    return group.size() // ranks_per_nvlink_domain
 
 
-def _hybrid_ep_uses_internode_rdma(group: torch.distributed.ProcessGroup) -> bool:
-    if _hybrid_ep_buffer is not None and hasattr(_hybrid_ep_buffer, "num_of_nodes"):
-        return _hybrid_ep_buffer.num_of_nodes > 1
-    return _hybrid_ep_num_nodes(group) > 1
+def _hybrid_ep_ib_tx_depth(num_tokens: int) -> int:
+    return _HYBRID_EP_IB_DISPATCH_DEPTH_PER_TOKEN * _hybrid_ep_buffer_tokens(num_tokens) + 1
 
 
-def _validate_hybrid_ep_ib_tx_depth(num_tokens: int, group: torch.distributed.ProcessGroup) -> None:
+def _hybrid_ep_max_supported_tokens() -> int:
+    return (
+        ((_HYBRID_EP_IB_QP_MAX_DEPTH - 1) // _HYBRID_EP_IB_DISPATCH_DEPTH_PER_TOKEN)
+        // _HYBRID_EP_TOKEN_ALIGNMENT
+        * _HYBRID_EP_TOKEN_ALIGNMENT
+    )
+
+
+def _hybrid_ep_initial_buffer_tokens(num_tokens: int) -> int:
+    if _hybrid_ep_ib_tx_depth(num_tokens) <= _HYBRID_EP_IB_QP_MAX_DEPTH:
+        return num_tokens
+    return _hybrid_ep_max_supported_tokens()
+
+
+def _hybrid_ep_uses_nic() -> bool:
+    return _hybrid_ep_buffer is not None and getattr(_hybrid_ep_buffer, "num_of_nodes", 1) > 1
+
+
+def _validate_hybrid_ep_ib_tx_depth(num_tokens: int) -> None:
     buffer_tokens = max(
         _round_up_to_multiple(num_tokens, _HYBRID_EP_TOKEN_ALIGNMENT), _HYBRID_EP_MIN_BUFFER_TOKENS
     )
@@ -317,21 +321,17 @@ def _validate_hybrid_ep_ib_tx_depth(num_tokens: int, group: torch.distributed.Pr
     if tx_depth <= _HYBRID_EP_IB_QP_MAX_DEPTH:
         return
 
-    if not _hybrid_ep_uses_internode_rdma(group):
+    if not _hybrid_ep_uses_nic():
         return
 
-    max_supported_tokens = (
-        ((_HYBRID_EP_IB_QP_MAX_DEPTH - 1) // _HYBRID_EP_IB_DISPATCH_DEPTH_PER_TOKEN)
-        // _HYBRID_EP_TOKEN_ALIGNMENT
-        * _HYBRID_EP_TOKEN_ALIGNMENT
-    )
+    max_supported_tokens = _hybrid_ep_max_supported_tokens()
     raise ValueError(
         f"HybridEP InfiniBand dispatch queue pair depth ({tx_depth}) exceeds the hardware "
         f"limit of {_HYBRID_EP_IB_QP_MAX_DEPTH}. DeepEP computes this depth from the "
         f"tokens per rank rounded up to a {_HYBRID_EP_TOKEN_ALIGNMENT}-token buffer "
         f"alignment ({buffer_tokens}). Reduce sequence length or micro-batch size, or "
         f"increase Tensor Parallelism (TP) / Context Parallelism (CP), so tokens per rank "
-        f"are at most {max_supported_tokens} for multi-node HybridEP."
+        f"are at most {max_supported_tokens} for HybridEP groups that use the NIC path."
     )
 
 
@@ -451,13 +451,12 @@ class HybridEPDispatch(torch.autograd.Function):
                 num_blocks_unpermute = None
 
         num_tokens, hidden_dim = x.shape[-2:]
-        _validate_hybrid_ep_ib_tx_depth(num_tokens, group)
         if _hybrid_ep_buffer is None:
             fp8_dispatch = False  # Currently, we do not support fp8 dispatch
             init_hybrid_ep_buffer(
                 group,
                 hidden_dim,
-                num_tokens,
+                _hybrid_ep_initial_buffer_tokens(num_tokens),
                 num_local_experts,
                 num_sms_dispatch_api,
                 num_sms_combine_api,
@@ -466,6 +465,7 @@ class HybridEPDispatch(torch.autograd.Function):
                 fp8_dispatch,
                 num_sms_preprocessing_api,
             )
+        _validate_hybrid_ep_ib_tx_depth(num_tokens)
         # If we provide the num_permuted_tokens, we do not need to use sync to
         # wait for the data in pinned memory ready
         non_blocking = num_permuted_tokens is not None
