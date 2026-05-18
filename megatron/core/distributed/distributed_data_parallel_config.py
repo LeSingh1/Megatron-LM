@@ -224,7 +224,6 @@ class DistributedDataParallelConfig:
         """
         import os
 
-        """Check the validity of the config."""
         if self.reuse_grad_buf_for_mxfp8_param_ag:
             assert self.fp8_param_gather, "Reuse grad buffer only when keeping params in MXFP8."
 
